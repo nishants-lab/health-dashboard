@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nishant Sinha — Health Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <style>
+        :root { --bg:#0f1419;--bg-card:#1a1f25;--border:#2f3336;--text:#e7e9ea;--text-muted:#71767b;--grid:#2f3336;--flip-bg:#1e2530; }
+        [data-theme="light"] { --bg:#f7f9fa;--bg-card:#ffffff;--border:#e1e4e8;--text:#1f2328;--text-muted:#656d76;--grid:#e1e4e8;--flip-bg:#f0f3f6; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);padding:24px;line-height:1.5;transition:background .3s,color .3s;-webkit-tap-highlight-color:transparent}
+        .top-bar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;flex-wrap:wrap;gap:12px}
+        h1{font-size:28px;font-weight:700;margin-bottom:8px}
+        .subtitle{color:var(--text-muted);font-size:14px}
+        .theme-toggle{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);cursor:pointer;font-size:13px;font-weight:500}
+        .theme-toggle:hover{border-color:var(--text-muted)}
+        .nav-tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:0;flex-wrap:wrap}
+        .nav-tab{padding:10px 18px;cursor:pointer;font-size:14px;font-weight:500;border-bottom:2px solid transparent;color:var(--text-muted);transition:all .2s}
+        .nav-tab:hover{color:var(--text)}
+        .nav-tab.active{color:#1d9bf0;border-bottom-color:#1d9bf0}
+        .tab-content{display:none}
+        .tab-content.active{display:block}
+
+        .health-score-section{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:48px}
+        .health-score-section h2{font-size:20px;margin-bottom:16px}
+        .score-row{display:flex;align-items:center;gap:32px;flex-wrap:wrap;margin-bottom:24px}
+        .score-big{font-size:64px;font-weight:700;line-height:1}
+        .score-label{font-size:14px;color:var(--text-muted)}
+        .score-breakdown{flex:1;min-width:300px}
+        .score-bar-group{margin-bottom:10px}
+        .score-bar-label{font-size:12px;color:var(--text-muted);display:flex;justify-content:space-between;margin-bottom:3px}
+        .score-bar-track{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+        .score-bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+        .score-chart-container{height:200px;margin-top:16px}
+        .score-method{font-size:11px;color:var(--text-muted);margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
+
+        .section{margin-bottom:48px}
+        .section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+        .section-header h2{font-size:20px;font-weight:600}
+        .priority-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:12px;text-transform:uppercase;letter-spacing:.5px}
+        .priority-high{background:#67000d;color:#ff6b6b}
+        .priority-medium{background:#5c3d00;color:#ffa940}
+        .priority-normal{background:#1a3a1a;color:#52c41a}
+        [data-theme="light"] .priority-high{background:#fff1f0;color:#cf1322}
+        [data-theme="light"] .priority-medium{background:#fff7e6;color:#d46b08}
+        [data-theme="light"] .priority-normal{background:#f6ffed;color:#389e0d}
+        .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(480px,1fr));gap:20px}
+        .flip-card{perspective:1000px;cursor:pointer}
+        .flip-card-inner{position:relative;transition:transform .5s;transform-style:preserve-3d}
+        .flip-card.flipped .flip-card-inner{transform:rotateY(180deg)}
+        .flip-card-front,.flip-card-back{backface-visibility:hidden;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);padding:20px}
+        .flip-card-back{position:absolute;top:0;left:0;right:0;bottom:0;transform:rotateY(180deg);overflow-y:auto;background:var(--flip-bg);display:flex;flex-direction:column;justify-content:center}
+        .flip-card-back h4{font-size:14px;font-weight:600;margin-bottom:8px}
+        .flip-card-back p{font-size:12px;color:var(--text-muted);margin-bottom:6px;line-height:1.5}
+        .flip-card-back .your-status{font-size:12px;margin-top:8px;padding:8px;border-radius:6px;background:var(--bg-card);border:1px solid var(--border)}
+        .flip-hint{font-size:10px;color:var(--text-muted);position:absolute;bottom:8px;right:12px;opacity:.6}
+        .chart-card h3{font-size:14px;font-weight:600;margin-bottom:4px}
+        .chart-meta{font-size:12px;color:var(--text-muted);margin-bottom:12px}
+        .chart-container{position:relative;height:220px}
+        .latest-value{display:inline-block;font-size:12px;padding:2px 6px;border-radius:4px;margin-left:8px}
+        .val-high{background:#67000d;color:#ff6b6b}
+        .val-low{background:#67000d;color:#ff6b6b}
+        .val-normal{background:#1a3a1a;color:#52c41a}
+        [data-theme="light"] .val-high{background:#fff1f0;color:#cf1322}
+        [data-theme="light"] .val-low{background:#fff1f0;color:#cf1322}
+        [data-theme="light"] .val-normal{background:#f6ffed;color:#389e0d}
+        .legend-note{font-size:11px;color:var(--text-muted);margin-top:24px;padding:12px;background:var(--bg-card);border-radius:8px;border:1px solid var(--border)}
+
+        /* Plan styles */
+        .plan-section{margin-bottom:36px}
+        .plan-section h3{font-size:18px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+        .plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+        .plan-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px}
+        .plan-card h4{font-size:14px;font-weight:600;margin-bottom:8px}
+        .plan-card ul{padding-left:16px;font-size:13px;color:var(--text-muted);line-height:1.8}
+        .plan-card li{margin-bottom:4px}
+        .plan-card .target-badge{display:inline-block;font-size:11px;padding:2px 6px;border-radius:4px;background:#1a3a1a;color:#52c41a;margin-bottom:8px}
+        [data-theme="light"] .plan-card .target-badge{background:#f6ffed;color:#389e0d}
+        .plan-card .why{font-size:11px;color:var(--text-muted);margin-top:8px;font-style:italic}
+        .meal-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+        .meal-table th,.meal-table td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+        .meal-table th{font-weight:600;font-size:12px;color:var(--text-muted);text-transform:uppercase}
+        .meal-card-mobile{display:none}
+        .meal-card-item{background:var(--flip-bg);border-radius:10px;padding:14px;margin-bottom:10px}
+        .meal-card-item .meal-time{font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600;margin-bottom:2px}
+        .meal-card-item .meal-name{font-size:14px;font-weight:600;margin-bottom:6px}
+        .meal-card-item .meal-content{font-size:12px;color:var(--text-muted);line-height:1.6}
+        .meal-card-item .meal-why{font-size:11px;color:var(--text-muted);margin-top:6px;font-style:italic;opacity:0.8}
+        .workout-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+        .workout-table th,.workout-table td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+        .workout-table th{font-weight:600;font-size:12px;color:var(--text-muted)}
+        .week-split{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:12px}
+        .day-card{background:var(--flip-bg);border-radius:8px;padding:10px;font-size:12px}
+        .day-card strong{display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;color:var(--text-muted)}
+
+        @media(max-width:768px){
+            body{padding:12px}
+            h1{font-size:22px}
+            .subtitle{font-size:12px}
+            .top-bar{margin-bottom:20px}
+            .nav-tabs{gap:0;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+            .nav-tab{padding:10px 14px;font-size:13px;white-space:nowrap;flex-shrink:0}
+            .health-score-section{padding:16px;margin-bottom:28px;border-radius:12px}
+            .health-score-section h2{font-size:17px}
+            .score-row{gap:16px}
+            .score-big{font-size:48px}
+            .score-breakdown{min-width:unset;width:100%}
+            .score-chart-container{height:160px}
+            .score-method{font-size:10px}
+            .section{margin-bottom:28px}
+            .section-header{flex-wrap:wrap;gap:8px;margin-bottom:12px;padding-bottom:8px}
+            .section-header h2{font-size:16px}
+            .charts-grid{grid-template-columns:1fr;gap:12px}
+            .flip-card-front,.flip-card-back{padding:14px}
+            .chart-card h3{font-size:13px}
+            .chart-meta{font-size:11px;margin-bottom:8px}
+            .chart-container{height:180px}
+            .flip-card-back h4{font-size:13px}
+            .flip-card-back p{font-size:11px}
+            .flip-card-back .your-status{font-size:11px;padding:6px}
+            .plan-grid{grid-template-columns:1fr;gap:12px}
+            .plan-card{padding:14px}
+            .plan-card h4{font-size:13px}
+            .plan-card ul{font-size:12px;line-height:1.7;padding-left:14px}
+            .plan-card .why{font-size:10px}
+            .meal-table{display:none}
+            .meal-card-mobile{display:block}
+            .workout-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;font-size:12px}
+            .workout-table th,.workout-table td{padding:6px 8px;min-width:70px}
+            .week-split{grid-template-columns:repeat(2,1fr);gap:6px}
+            .day-card{padding:8px;font-size:11px}
+            .day-card strong{font-size:10px}
+            .legend-note{font-size:10px;padding:10px}
+            .priority-badge{font-size:10px;padding:2px 6px}
+            .latest-value{font-size:11px;padding:1px 5px}
+        }
+        @media(max-width:400px){
+            body{padding:8px}
+            h1{font-size:19px}
+            .score-big{font-size:40px}
+            .chart-container{height:150px}
+            .week-split{grid-template-columns:1fr}
+            .nav-tab{padding:8px 10px;font-size:12px}
+            .meal-table th,.meal-table td{padding:5px 6px;font-size:11px}
+        }
+    </style>
+</head>
+<body>
+<div class="top-bar">
+    <div>
+        <h1>Health Dashboard — Nishant Sinha</h1>
+        <p class="subtitle">8 reports: Apr 2022 → Jun 2026 | Male, 38 yrs | Click any chart card to flip for explanation</p>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">☀️ Light Mode</button>
+</div>
+
+<div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
+    <div class="nav-tab" onclick="switchTab('plan')">🥗 Diet & Workout Plan</div>
+</div>
+
+<!-- ============ TAB 1: DASHBOARD ============ -->
+<div class="tab-content active" id="tab-dashboard">
+
+<div class="health-score-section">
+    <h2>📊 Overall Health Score (Trend-Adjusted)</h2>
+    <div class="score-row">
+        <div>
+            <div class="score-big" id="current-score"></div>
+            <div class="score-label">out of 100 (Jun 2026)</div>
+        </div>
+        <div class="score-breakdown" id="score-breakdown"></div>
+    </div>
+    <div class="score-chart-container"><canvas id="chart-healthscore"></canvas></div>
+    <div class="score-method">
+        <strong>Scoring model:</strong> Composite of current value (60%), trend direction over last 3 readings (25%), and persistence penalty for consecutive out-of-range (15%).
+        <strong>Weights:</strong> Thyroid 20% | Lipid 25% (HDL 10%, LDL 8%, TG 7%) | Blood Sugar 15% | CBC 10% | Liver 10% | Kidney 10% | Vitamins 5% | Electrolytes 5%.
+        <strong>Max score is 100</strong> — 100 means every parameter is within its optimal range — achievable through the right combination of medication, diet, and exercise.
+        <strong>Clinical basis:</strong> Weights derived from Framingham Risk Score components (lipid/BP/diabetes weighting), ATA hypothyroidism guidelines (thyroid weight elevated for subclinical hypo with cascading effects), and LAI-2020 Indian cardiovascular risk data.
+    </div>
+</div>
+
+<div class="section"><div class="section-header"><h2>🔴 Thyroid Function</h2><span class="priority-badge priority-high">Consistently Out of Range</span></div><div class="charts-grid" id="grid-thyroid"></div></div>
+<div class="section"><div class="section-header"><h2>🔴 Lipid Profile</h2><span class="priority-badge priority-high">HDL Persistently Low</span></div><div class="charts-grid" id="grid-lipid"></div></div>
+<div class="section"><div class="section-header"><h2>🟡 Vitamins</h2><span class="priority-badge priority-medium">Previously Deficient — Now Recovered</span></div><div class="charts-grid" id="grid-vitamins"></div></div>
+<div class="section"><div class="section-header"><h2>🟡 Electrolytes</h2><span class="priority-badge priority-medium">Sodium Dipped in Apr 2026</span></div><div class="charts-grid" id="grid-electrolytes"></div></div>
+<div class="section"><div class="section-header"><h2>✅ Blood Sugar / Diabetes</h2><span class="priority-badge priority-normal">Consistently Normal</span></div><div class="charts-grid" id="grid-sugar"></div></div>
+<div class="section"><div class="section-header"><h2>✅ Complete Blood Count</h2><span class="priority-badge priority-normal">Stable & Normal</span></div><div class="charts-grid" id="grid-cbc"></div></div>
+<div class="section"><div class="section-header"><h2>✅ Liver Function</h2><span class="priority-badge priority-normal">Always Normal</span></div><div class="charts-grid" id="grid-liver"></div></div>
+<div class="section"><div class="section-header"><h2>✅ Kidney Function</h2><span class="priority-badge priority-normal">Normal — Uric Acid Trending Up</span></div><div class="charts-grid" id="grid-kidney"></div></div>
+
+<div class="legend-note">
+    <strong>How to read:</strong> Green band = normal range. Red dots = out of range. Click any card to see what it means for you.
+    <br><strong>Last updated:</strong> 14 Jun 2026 (Report #8). Anti-TPO: <strong>NEGATIVE (&lt;3.00 IU/mL)</strong> — not Hashimoto's. Natural thyroid management is viable.
+</div>
+</div>
+
+<!-- ============ TAB 2: DIET & WORKOUT PLAN ============ -->
+<div class="tab-content" id="tab-plan">
+
+<div class="plan-section">
+    <h3>🎯 Parameters to Fix & Strategy</h3>
+    <div class="plan-grid">
+        <div class="plan-card">
+            <h4>🔴 TSH (Hypothyroid) — 9.07 → target &lt;4.94</h4>
+            <span class="target-badge">Needs: Diet + Exercise + Stress Management (No medication)</span>
+            <ul>
+                <li><strong>Selenium</strong> — 3 Brazil nuts/day (≈200 µg). Proven to support T4→T3 conversion and reduce thyroid antibodies</li>
+                <li><strong>Zinc</strong> — pumpkin seeds (2 tbsp/day), lentils, chickpeas. Required for TSH receptor signaling</li>
+                <li><strong>Iodine</strong> — use iodized salt normally in cooking. Don't supplement beyond this (excess can worsen things)</li>
+                <li><strong>Cook cruciferous vegetables</strong> — broccoli, cauliflower, cabbage are fine COOKED. Raw goitrogens interfere with iodine uptake</li>
+                <li><strong>Avoid excess soy</strong> — moderate tofu is fine, but don't overdo soy milk/protein (isoflavones can interfere)</li>
+                <li><strong>Gluten awareness</strong> — Anti-TPO came back NEGATIVE, so no Hashimoto's. Gluten-free trial NOT needed. Eat normal wheat/roti freely.</li>
+                <li><strong>Stress management</strong> — high cortisol directly suppresses thyroid function. Yoga, meditation, sleep quality matter</li>
+                <li><strong>Exercise</strong> — moderate cardio improves thyroid hormone sensitivity (don't over-exercise — that can worsen hypothyroidism)</li>
+                <li><strong>Vitamin D</strong> — maintain above 40 ng/mL. Deficiency correlates with thyroid autoimmunity</li>
+                <li><strong>Sleep</strong> — 7–8 hours. TSH peaks during sleep; disrupted sleep = disrupted thyroid axis</li>
+            </ul>
+            <div class="why">Natural approach is well-suited for your case — Anti-TPO is NEGATIVE, confirming this is NOT autoimmune (Hashimoto's). Non-autoimmune subclinical hypothyroidism responds better to lifestyle changes. Retest after 12 weeks. If TSH rises above 10 or you experience significant fatigue/weight gain/cold intolerance, reconsider medication.</div>
+        </div>
+        <div class="plan-card">
+            <h4>🔴 HDL — 35 → target >45</h4>
+            <span class="target-badge">Needs: Exercise + Diet + Time</span>
+            <ul>
+                <li><strong>Aerobic exercise 150+ min/week</strong> — single biggest HDL raiser (5–10% increase per meta-analyses)</li>
+                <li>Omega-3: 2 tbsp ground flaxseed/day + walnuts + algae-based DHA capsule (veg alternative to fish oil)</li>
+                <li>Monounsaturated fats: 1–2 tbsp extra-virgin olive oil daily, avocado, almonds</li>
+                <li>Eliminate trans fats completely (fried snacks, bakery items with vanaspati)</li>
+                <li>Coconut oil in moderation — it can raise HDL but also raises LDL</li>
+                <li>Lose visceral fat — even 3–5 kg loss improves HDL</li>
+            </ul>
+            <div class="why">HDL is the hardest lipid to raise through diet alone. Sustained aerobic exercise is the #1 lever. Thyroid improvement will add another 5–15% HDL boost on top.</div>
+        </div>
+        <div class="plan-card">
+            <h4>🟡 LDL — 112 → target &lt;100</h4>
+            <span class="target-badge">Needs: Diet modification</span>
+            <ul>
+                <li>Soluble fiber: 10–25g/day (oats, barley, beans, psyllium husk)</li>
+                <li>Plant sterols/stanols: 2g/day (fortified spreads or supplements)</li>
+                <li>Reduce saturated fat to &lt;7% of calories (limit ghee, coconut oil, full-fat dairy)</li>
+                <li>Almonds — a handful (~15) daily. Proven 5–7% LDL reduction (Sabate et al., JAMA 2003). Normal snacking amount.</li>
+                <li>Soy protein 25g/day (tofu, soy milk, edamame)</li>
+                <li>Thyroid improvement will reduce LDL by 10–20% on its own</li>
+            </ul>
+            <div class="why">Your LDL is borderline — achievable with diet alone if thyroid is fixed. No statin needed at current levels unless other risk factors compound.</div>
+        </div>
+        <div class="plan-card">
+            <h4>🟡 Triglycerides — 161 → target &lt;150</h4>
+            <span class="target-badge">Needs: Diet timing + Carb control</span>
+            <ul>
+                <li><strong>Reduce refined carbs</strong> — white rice, white bread, maida, sugar</li>
+                <li>Limit fructose (fruit juice, soft drinks, sweets)</li>
+                <li>Omega-3 fatty acids (same as HDL plan — 2–4g/day)</li>
+                <li>Avoid large meals at night — spread intake across day</li>
+                <li>12-hour overnight fast (e.g., 8pm–8am)</li>
+                <li>Replace refined carbs with complex: brown rice, millets, whole wheat</li>
+            </ul>
+            <div class="why">Your TG swings 108–207 — highly diet-responsive. A carb-heavy dinner the night before testing can spike it 30–50 mg/dL.</div>
+        </div>
+        <div class="plan-card">
+            <h4>🟡 Uric Acid — 8.0 → target &lt;7.0</h4>
+            <span class="target-badge">Needs: Diet + Hydration</span>
+            <ul>
+                <li><strong>Water: 3+ liters/day</strong> — flushes uric acid via kidneys</li>
+                <li>Limit high-purine foods: mushrooms (moderate), spinach (moderate — purine content overstated), asparagus</li>
+                <li>Limit beer and spirits</li>
+                <li>Reduce fructose (raises uric acid via purine metabolism)</li>
+                <li>Cherry/cherry juice — evidence for uric acid reduction</li>
+                <li>Low-fat dairy (milk, yogurt) — protective effect</li>
+                <li>Vitamin C 500mg/day — modest uric acid lowering</li>
+            </ul>
+            <div class="why">Trending 6.9→8.0 over 2 years. Still within range but approaching gout territory (>8.5). Easy to fix with hydration + dietary tweaks. Hypothyroidism also raises uric acid.</div>
+        </div>
+    </div>
+</div>
+
+<div class="plan-section">
+    <h3>🍽️ Daily Diet Plan</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Vegetarian + eggs. Designed for: ↑ HDL, ↓ LDL, ↓ TG, ↓ Uric acid, thyroid support. ~1800–2000 kcal/day. Adjust portions based on activity level.</p>
+    <table class="meal-table">
+        <thead><tr><th>Time</th><th>Meal</th><th>What to eat</th><th>Why</th></tr></thead>
+        <tbody>
+            <tr><td>7:00 AM</td><td>Morning</td><td>Warm water + lemon. Then black coffee or green tea after 15 min.</td><td>Hydration. Caffeine mildly supports HDL.</td></tr>
+            <tr><td>8:00 AM</td><td>Breakfast</td><td><strong>Option A:</strong> Oats (½ cup) cooked with milk + 4–5 walnut halves + 1 tbsp ground flaxseed + a few blueberries/banana slices + 2 boiled eggs<br><strong>Option B:</strong> 2 moong dal chilla with mint chutney + 1 boiled egg + a handful of almonds<br><strong>Option C:</strong> Greek yogurt (200g) + 1 tbsp chia seeds + mixed nuts (walnut, almond) + fruit</td><td>Soluble fiber (oats) ↓ LDL. Omega-3 (walnuts, flax) ↑ HDL. Eggs are fine — dietary cholesterol has minimal LDL impact. Protein keeps you full.</td></tr>
+            <tr><td>10:30 AM</td><td>Mid-morning</td><td>1 fruit (apple/guava/pear) + 3 Brazil nuts</td><td>Brazil nuts = selenium for thyroid (just 3 gives you a full day's selenium — they're small, eat them like cashews). Fruit fiber.</td></tr>
+            <tr><td>1:00 PM</td><td>Lunch</td><td><strong>Base:</strong> Brown rice (¾ cup) OR 2 multigrain/jowar rotis<br><strong>Protein:</strong> Dal (1.5 cups — masoor, moong, or chana) OR rajma/chole OR paneer (75g, not fried) OR tofu stir-fry<br><strong>Veggies:</strong> Large portion cooked sabzi (palak, bhindi, beans, turai, lauki) + salad with 1 tbsp olive oil<br><strong>Side:</strong> Cucumber raita or buttermilk</td><td>Complex carbs ↓ TG vs white rice. Olive oil ↑ HDL. Dal = protein + soluble fiber. Cook cruciferous veg (don't eat raw for thyroid). Buttermilk ↓ uric acid.</td></tr>
+            <tr><td>4:30 PM</td><td>Evening snack</td><td>A handful of almonds (~12–15) + green tea OR roasted chana (¼ cup) + buttermilk OR 1 egg omelette on multigrain toast</td><td>Almonds = proven LDL reduction. A "handful" is literally what fits loosely in your palm — about 15 pieces, normal snacking amount like eating cashews with chai. Green tea antioxidants.</td></tr>
+            <tr><td>7:30 PM</td><td>Dinner</td><td><strong>Option A:</strong> Palak/methi paneer (low oil) + 1 roti + salad<br><strong>Option B:</strong> Khichdi (moong dal + brown rice) with ghee (1 tsp only) + roasted papad + vegetable raita<br><strong>Option C:</strong> Vegetable stir-fry with tofu + small portion quinoa or millets<br><strong>Option D:</strong> 2-egg omelette with veggies + 1 multigrain toast + soup</td><td>Light dinner ↓ overnight TG. Keep carbs low at night. Paneer/tofu/eggs for protein. Cooked veggies for fiber + thyroid safety.</td></tr>
+            <tr><td>9:00 PM</td><td>Post-dinner</td><td>Warm turmeric milk (low-fat, with pinch of black pepper) OR chamomile tea</td><td>Anti-inflammatory. Turmeric supports thyroid. No food after this — 11-hour overnight fast begins.</td></tr>
+        </tbody>
+    </table>
+    <div class="meal-card-mobile">
+        <div class="meal-card-item"><div class="meal-time">7:00 AM</div><div class="meal-name">Morning</div><div class="meal-content">Warm water + lemon. Then black coffee or green tea after 15 min.</div><div class="meal-why">Hydration. Caffeine mildly supports HDL.</div></div>
+        <div class="meal-card-item"><div class="meal-time">8:00 AM</div><div class="meal-name">Breakfast</div><div class="meal-content"><strong>A:</strong> Oats (½ cup) + 4–5 walnut halves + 1 tbsp ground flaxseed + berries + 2 boiled eggs<br><strong>B:</strong> 2 moong dal chilla + mint chutney + 1 boiled egg + almonds<br><strong>C:</strong> Greek yogurt (200g) + chia seeds + mixed nuts + fruit</div><div class="meal-why">Soluble fiber ↓ LDL. Omega-3 ↑ HDL. Protein for satiety.</div></div>
+        <div class="meal-card-item"><div class="meal-time">10:30 AM</div><div class="meal-name">Mid-morning</div><div class="meal-content">1 fruit (apple/guava/pear) + 3 Brazil nuts</div><div class="meal-why">Selenium for thyroid. Just 3 small nuts = full day's dose.</div></div>
+        <div class="meal-card-item"><div class="meal-time">1:00 PM</div><div class="meal-name">Lunch</div><div class="meal-content"><strong>Base:</strong> Brown rice (¾ cup) or 2 multigrain rotis<br><strong>Protein:</strong> Dal (1.5 cups) / rajma / paneer (75g) / tofu<br><strong>Veggies:</strong> Cooked sabzi + salad with olive oil<br><strong>Side:</strong> Buttermilk or raita</div><div class="meal-why">Complex carbs ↓ TG. Olive oil ↑ HDL. Cook cruciferous vegs for thyroid.</div></div>
+        <div class="meal-card-item"><div class="meal-time">4:30 PM</div><div class="meal-name">Evening Snack</div><div class="meal-content">Handful almonds (~12–15) + green tea<br>OR roasted chana + buttermilk<br>OR 1 egg omelette on multigrain toast</div><div class="meal-why">Almonds ↓ LDL. Normal snacking amount — what fits in your palm.</div></div>
+        <div class="meal-card-item"><div class="meal-time">7:30 PM</div><div class="meal-name">Dinner</div><div class="meal-content"><strong>A:</strong> Palak paneer (low oil) + 1 roti + salad<br><strong>B:</strong> Khichdi + 1 tsp ghee + roasted papad + raita<br><strong>C:</strong> Veg stir-fry with tofu + quinoa/millets<br><strong>D:</strong> 2-egg omelette + veggies + toast + soup</div><div class="meal-why">Light dinner ↓ overnight TG. Low carbs at night.</div></div>
+        <div class="meal-card-item"><div class="meal-time">9:00 PM</div><div class="meal-name">Post-dinner</div><div class="meal-content">Warm turmeric milk (low-fat) + pinch black pepper<br>OR chamomile tea</div><div class="meal-why">Anti-inflammatory. 11-hour fast begins.</div></div>
+    </div>
+    <div style="margin-top:16px;font-size:12px;color:var(--text-muted)">
+        <strong>Supplements:</strong> Algae-based Omega-3 DHA/EPA (1–2g/day — veg fish oil alternative) | Vitamin D3 (1000 IU/day maintenance) | Vitamin B12 (methylcobalamin 1000 µg/day — essential for vegetarians) | Vitamin C (500 mg) | Ground flaxseed daily covers ALA omega-3
+        <br><strong>Nuts clarification:</strong> "3 Brazil nuts" = 3 individual small nuts. "A handful of almonds" = 12–15 pieces. These are normal snacking amounts — eat them the way you'd eat cashews or peanuts, not like pills.
+        <br><strong>Avoid:</strong> Fried foods, maida products (samosa, bread pakora, naan), sugary drinks, excessive white rice at dinner, trans fat (vanaspati/dalda), raw cruciferous in large amounts, excess soy beyond 1 serving/day
+    </div>
+</div>
+
+<div class="plan-section">
+    <h3>🏋️ Weekly Workout Plan</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Primary goal: ↑ HDL via sustained aerobic exercise. Secondary: ↓ visceral fat, ↓ LDL, improve insulin sensitivity. 5 days/week, 45–60 min sessions.</p>
+    <div class="week-split">
+        <div class="day-card"><strong>Monday</strong>Zone 2 Cardio<br>45 min brisk walk/jog/cycle<br>HR: 120–140 bpm<br><em>Best HDL stimulus</em></div>
+        <div class="day-card"><strong>Tuesday</strong>Strength (Upper)<br>Push-ups, rows, OHP, curls<br>3 sets × 12 reps<br>+ 15 min walk cooldown</div>
+        <div class="day-card"><strong>Wednesday</strong>Zone 2 Cardio<br>45 min swimming/cycling/elliptical<br>Sustained moderate effort<br><em>Best HDL stimulus</em></div>
+        <div class="day-card"><strong>Thursday</strong>Strength (Lower)<br>Squats, lunges, deadlifts, calf raises<br>3 sets × 12 reps<br>+ 15 min walk cooldown</div>
+        <div class="day-card"><strong>Friday</strong>HIIT / Sport<br>30 min intervals (4 min hard, 2 min easy × 5)<br>OR badminton/football/tennis<br><em>↓ TG, ↑ insulin sensitivity</em></div>
+        <div class="day-card"><strong>Saturday</strong>Active Recovery<br>45–60 min brisk walk or yoga<br>Focus: flexibility, stress<br><em>Cortisol ↓ helps TSH</em></div>
+        <div class="day-card"><strong>Sunday</strong>Rest or Light<br>Gentle walk, stretching<br>Or complete rest<br><em>Recovery</em></div>
+    </div>
+    <div style="margin-top:16px;font-size:12px;color:var(--text-muted)">
+        <strong>Why this split:</strong> Research shows 150+ min/week of moderate aerobic exercise raises HDL by 5–10% (meta-analysis: Kodama et al., Archives of Internal Medicine 2007).
+        Zone 2 cardio (where you can hold a conversation but feel effort) is the most effective intensity for HDL improvement.
+        Strength training improves insulin sensitivity, lowers LDL, and reduces visceral fat — but has less direct HDL effect than cardio.
+        <br><strong>Non-negotiable minimum:</strong> If you can't do the full plan, prioritize 3 days of 45-min Zone 2 cardio (Mon/Wed/Sat). This alone will move HDL more than any diet change.
+        <br><strong>Progression:</strong> Start at your current fitness. Week 1–4: build consistency. Week 5–8: increase duration/intensity by 10%. Retest lipids after 12 weeks.
+    </div>
+</div>
+
+<div class="plan-section">
+    <h3>📅 Expected Timeline</h3>
+    <table class="workout-table">
+        <thead><tr><th>Marker</th><th>Current</th><th>Target</th><th>Expected timeline</th><th>Primary lever</th></tr></thead>
+        <tbody>
+            <tr><td>TSH</td><td>9.07</td><td>&lt;4.94</td><td>12–16 weeks (slower without medication)</td><td>Selenium + zinc + stress management + exercise + sleep</td></tr>
+            <tr><td>HDL</td><td>35</td><td>>45</td><td>3–6 months of consistent exercise</td><td>Aerobic exercise + omega-3 + thyroid improvement</td></tr>
+            <tr><td>LDL</td><td>112</td><td>&lt;100</td><td>8–12 weeks with diet + thyroid fix</td><td>Fiber + reduced sat fat + thyroid</td></tr>
+            <tr><td>Triglycerides</td><td>161</td><td>&lt;150</td><td>2–4 weeks with carb reduction</td><td>Diet (reduce refined carbs/sugar)</td></tr>
+            <tr><td>Uric Acid</td><td>8.0</td><td>&lt;7.0</td><td>4–8 weeks with hydration + diet</td><td>Water intake + purine reduction</td></tr>
+            <tr><td>Chol/HDL Ratio</td><td>5.1</td><td>&lt;4.5</td><td>3–6 months (follows HDL)</td><td>HDL improvement is the driver</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="legend-note">
+    <strong>Disclaimer:</strong> This is not medical advice. It's a data-driven plan based on published clinical guidelines (AHA, NCEP ATP III, LAI-2020, ATA, ADA).
+    Consult your endocrinologist for thyroid medication adjustment and a physician before starting a new exercise program.
+    Retest all markers after 12 weeks of adherence to measure progress.
+</div>
+</div>
+
+<script>
+// ============ TABS ============
+function switchTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+    document.querySelectorAll('.nav-tab').forEach(function(el) { el.classList.remove('active'); });
+    document.getElementById('tab-' + tab).classList.add('active');
+    event.target.classList.add('active');
+    if (tab === 'dashboard') buildAllCharts();
+}
+
+// ============ THEME ============
+function toggleTheme() {
+    var btn = document.querySelector('.theme-toggle');
+    if (document.body.getAttribute('data-theme') === 'light') {
+        document.body.removeAttribute('data-theme');
+        btn.textContent = '☀️ Light Mode';
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.body.setAttribute('data-theme', 'light');
+        btn.textContent = '🌙 Dark Mode';
+        localStorage.setItem('theme', 'light');
+    }
+    buildAllCharts();
+}
+if (localStorage.getItem('theme') === 'light') {
+    document.body.setAttribute('data-theme', 'light');
+    document.querySelector('.theme-toggle').textContent = '🌙 Dark Mode';
+}
+
+// ============ DATA ============
+var dates = ['Apr 2022','Dec 2022','Mar 2023','Jun 2024','May 2025','Feb 2026','Apr 2026','Jun 2026'];
+var chartDefs = {
+    thyroid: [
+        {id:'tsh',label:'TSH (µIU/mL)',data:[12.75,null,15.14,7.72,11.24,8.43,8.33,9.07],min:0.35,max:4.94,color:'#ff6b6b',latest:'9.07 µIU/mL',latestClass:'val-high',meta:'Target: 0.35–4.94 | Elevated in ALL tests',explain:'TSH signals the thyroid to produce hormones. High TSH = underactive thyroid (hypothyroidism). The pituitary gland is working overtime to compensate.',status:'Consistently 2–3× upper limit since 2022. Subclinical hypothyroidism confirmed (T3/T4 normal). Cascading effects: raises LDL, lowers HDL, causes fatigue, weight gain. Medication dose likely needs adjustment.'},
+        {id:'ft3',label:'Free T3 (pg/mL)',data:[null,null,null,null,null,2.55,null,2.35],min:1.58,max:3.91,color:'#1d9bf0',latest:'2.35 pg/mL',latestClass:'val-normal',meta:'Target: 1.58–3.91 | Always normal',explain:'Free T3 is the active thyroid hormone driving metabolism. Normal Free T3 with high TSH = subclinical hypothyroidism.',status:'Normal — your body still converts enough T4→T3. But this may not hold if TSH keeps rising.'},
+        {id:'ft4',label:'Free T4 (ng/dL)',data:[null,null,null,null,null,1.06,null,1.03],min:0.7,max:1.48,color:'#1d9bf0',latest:'1.03 ng/dL',latestClass:'val-normal',meta:'Target: 0.7–1.48 | Always normal',explain:'Free T4 is the storage hormone. The body converts it to active T3 as needed.',status:'Normal but mid-low range. If this drops below 0.7 with rising TSH, you\'d move from subclinical to overt hypothyroidism.'}
+    ],
+    lipid: [
+        {id:'hdl',label:'HDL (mg/dL)',data:[32.3,null,40,34,28,31,33,35],min:40,max:null,color:'#ff6b6b',latest:'35 mg/dL',latestClass:'val-low',meta:'Target: >40 (ideally >50) | Below range in ALL tests',explain:'HDL removes excess cholesterol from arteries. Low HDL is an independent cardiovascular risk factor, especially prevalent in Indians (~66% have low HDL per LAI-2020).',status:'Never been in range across 4 years (28–40). Slightly improving trend (28→35). Driven by hypothyroidism + likely sedentary lifestyle. Exercise is the #1 lever.'},
+        {id:'ldl',label:'LDL (mg/dL)',data:[116,null,105,129,112,100,128,112],min:null,max:100,color:'#ffa940',latest:'112 mg/dL',latestClass:'val-high',meta:'Target: <100 | Borderline-high',explain:'LDL deposits cholesterol in artery walls. Primary target for cardiovascular risk reduction per NCEP/LAI guidelines.',status:'Fluctuates 100–129. Borderline. Hypothyroidism directly raises LDL — fixing TSH could bring this below 100 without medication.'},
+        {id:'tg',label:'Triglycerides (mg/dL)',data:[207,null,158,108,186,186,110,161],min:null,max:150,color:'#1d9bf0',latest:'161 mg/dL',latestClass:'val-high',meta:'Target: <150 | Highly diet-responsive',explain:'Triglycerides are dietary fats. High TG = cardiovascular risk, especially in Indians with atherogenic dyslipidemia (high TG + low HDL + high LDL).',status:'Swings 108–207. Very sensitive to what you ate the night before testing. When controlled (Jun 2024: 108), your VLDL and ratios normalize too.'},
+        {id:'tc',label:'Total Cholesterol (mg/dL)',data:[176,null,156,158,177,168,183,179],min:null,max:200,color:'#1d9bf0',latest:'179 mg/dL',latestClass:'val-normal',meta:'Target: <200 | Always within range',explain:'Sum of all cholesterol fractions. A blunt instrument — can mask bad composition (low HDL + high LDL).',status:'Always normal, but your composition is unfavorable. Total cholesterol alone is misleading in your case.'},
+        {id:'vldl',label:'VLDL (mg/dL)',data:[41.5,null,31.6,22,37,37,22,32],min:null,max:30,color:'#ffa940',latest:'32 mg/dL',latestClass:'val-high',meta:'Target: <30 | Tracks with triglycerides',explain:'VLDL carries triglycerides. Calculated as TG/5. High VLDL = high TG being circulated.',status:'Directly follows your TG — when TG is controlled, VLDL normalizes. Fix TG and VLDL fixes itself.'},
+        {id:'cholratio',label:'Chol/HDL Ratio',data:[5.46,null,3.9,5.0,6.2,5.4,5.5,5.1],min:null,max:5.0,color:'#ffa940',latest:'5.1',latestClass:'val-high',meta:'Target: <5.0 | Best CVD predictor',explain:'Better predictor of cardiovascular risk than any single lipid. Reflects the balance of harmful vs. protective cholesterol.',status:'Almost always >5 due to low HDL. Raising HDL to 45 would bring ratio to ~4.0. This single improvement would transform your risk profile.'}
+    ],
+    vitamins: [
+        {id:'vitd',label:'Vitamin D (ng/mL)',data:[null,null,13.98,null,24.5,null,49.6,null],min:30,max:100,color:'#fadb14',latest:'49.6 ng/mL',latestClass:'val-normal',meta:'Target: 30–100 | Recovered ✅',explain:'Vitamin D supports bone health, immune function, and mood. Deficiency is epidemic in India despite sunny climate (indoor work, pollution, skin pigmentation).',status:'Excellent recovery: 14→25→50. Supplementation worked. Continue 1000 IU/day maintenance. No further action needed.'},
+        {id:'vitb12',label:'Vitamin B12 (pg/mL)',data:[null,null,190,null,166,null,283,null],min:211,max:null,color:'#fadb14',latest:'283 pg/mL',latestClass:'val-normal',meta:'Target: >211 | Recovered ✅',explain:'B12 is essential for nerve function and blood cell production. Deficiency causes fatigue, tingling, cognitive issues. Common in Indian vegetarian diets.',status:'Recovered from 166 to 283. Continue oral B12 supplements — levels will drop again if stopped.'}
+    ],
+    electrolytes: [
+        {id:'sodium',label:'Sodium (mmol/L)',data:[139,null,141,143,null,null,134,null],min:137,max:145,color:'#ffa940',latest:'134 mmol/L',latestClass:'val-low',meta:'Target: 137–145 | Dipped Apr 2026',explain:'Sodium maintains fluid balance and nerve function. Low sodium (hyponatremia) causes headaches, fatigue, confusion. Hypothyroidism is a known cause.',status:'Was stable 139–143 for 3 years, dropped to 134 in Apr 2026. Likely related to hypothyroidism or over-hydration before test. One-time dip — monitor next test.'},
+        {id:'potassium',label:'Potassium (mmol/L)',data:[null,null,4.2,4.7,null,null,4.4,null],min:3.5,max:5.1,color:'#1d9bf0',latest:'4.4 mmol/L',latestClass:'val-normal',meta:'Target: 3.5–5.1',explain:'Critical for heart rhythm and muscle function.',status:'Always normal. No action needed.'}
+    ],
+    sugar: [
+        {id:'hba1c',label:'HbA1c (%)',data:[null,4.9,4.8,null,5.1,null,4.7,null],min:null,max:5.7,color:'#52c41a',latest:'4.7%',latestClass:'val-normal',meta:'Target: <5.7% | Always normal',explain:'Reflects average blood sugar over 2–3 months. Gold standard for diabetes screening.',status:'Consistently 4.7–5.1% — zero diabetes risk. One of your strongest markers.'},
+        {id:'glucose',label:'Fasting Glucose (mg/dL)',data:[83.5,null,88.4,87,80,null,82,null],min:70,max:100,color:'#52c41a',latest:'82 mg/dL',latestClass:'val-normal',meta:'Target: 70–100',explain:'Snapshot of current blood sugar after overnight fast.',status:'Always 80–88 mg/dL. Textbook normal. Glucose metabolism is healthy.'}
+    ],
+    cbc: [
+        {id:'hb',label:'Hemoglobin (g/dL)',data:[15.2,15.7,15.8,14.5,15.0,14.9,14.8,null],min:13,max:17,color:'#1d9bf0',latest:'14.8 g/dL',latestClass:'val-normal',meta:'Target: 13–17',explain:'Oxygen-carrying protein in blood. Low = anemia.',status:'Rock stable. No anemia, excellent oxygen-carrying capacity.'},
+        {id:'platelets',label:'Platelets (×10³/µL)',data:[196,226,231,204,182,218,205,null],min:150,max:450,color:'#1d9bf0',latest:'205 ×10³/µL',latestClass:'val-normal',meta:'Target: 150–450',explain:'Blood clotting cells.',status:'Always mid-range normal. Healthy clotting function.'},
+        {id:'wbc',label:'WBC (×10³/µL)',data:[6.0,5.46,null,6.0,5.75,6.38,5.59,null],min:4,max:10,color:'#1d9bf0',latest:'5.59 ×10³/µL',latestClass:'val-normal',meta:'Target: 4–10',explain:'Immune cells fighting infection.',status:'Stable 5.5–6.4. No infections, no immune issues.'},
+        {id:'esr',label:'ESR (mm/hr)',data:[5,null,7,13,4,null,7,null],min:0,max:10,color:'#1d9bf0',latest:'7 mm/hr',latestClass:'val-normal',meta:'Target: 0–10',explain:'Non-specific inflammation marker.',status:'One mild spike (13 in Jun 2024), otherwise normal. No chronic inflammation.'}
+    ],
+    liver: [
+        {id:'ast',label:'AST/SGOT (U/L)',data:[27.7,null,21.7,25,26,null,31,null],min:null,max:50,color:'#52c41a',latest:'31 U/L',latestClass:'val-normal',meta:'Target: <50',explain:'Liver enzyme. Elevated = liver stress/damage.',status:'Always well within range. Healthy liver.'},
+        {id:'alt',label:'ALT/SGPT (U/L)',data:[15.9,null,16.7,20,19,null,28,null],min:null,max:50,color:'#52c41a',latest:'28 U/L',latestClass:'val-normal',meta:'Target: <50',explain:'Liver-specific enzyme. More sensitive than AST for liver issues.',status:'Normal. No fatty liver indicators.'},
+        {id:'bilirubin',label:'Bilirubin Total (mg/dL)',data:[0.45,null,0.82,1.0,0.95,null,1.09,null],min:0.2,max:1.3,color:'#52c41a',latest:'1.09 mg/dL',latestClass:'val-normal',meta:'Target: 0.2–1.3',explain:'Byproduct of red blood cell breakdown. High = liver/gallbladder issues.',status:'Slowly trending up (0.45→1.09) but within range. Could be mild Gilbert\'s syndrome (benign) — worth watching.'},
+        {id:'albumin',label:'Albumin (g/dL)',data:[4.31,null,4.41,4.2,4.7,null,4.4,null],min:3.5,max:5.0,color:'#52c41a',latest:'4.4 g/dL',latestClass:'val-normal',meta:'Target: 3.5–5.0',explain:'Main liver-produced protein. Reflects nutrition and liver function.',status:'Excellent — consistently 4.2–4.7. Good nutrition and liver synthesis.'}
+    ],
+    kidney: [
+        {id:'creatinine',label:'Creatinine (mg/dL)',data:[0.87,null,0.87,0.9,0.8,null,0.95,null],min:0.66,max:1.25,color:'#1d9bf0',latest:'0.95 mg/dL',latestClass:'val-normal',meta:'Target: 0.66–1.25',explain:'Muscle waste product filtered by kidneys. Stable creatinine = stable kidney function.',status:'Perfect kidney function across 4 years. No decline.'},
+        {id:'uricacid',label:'Uric Acid (mg/dL)',data:[7.2,null,6.86,7.2,6.9,null,8.0,null],min:3.5,max:8.5,color:'#ffa940',latest:'8.0 mg/dL',latestClass:'val-normal',meta:'Target: 3.5–8.5 | Trending up',explain:'From purine metabolism. High = gout risk, kidney stones. Affected by diet, hydration, and hypothyroidism.',status:'Trending up: 6.9→8.0. Approaching upper limit. Addressable with hydration (3L/day) and reduced purine intake. Hypothyroidism contributes.'},
+        {id:'egfr',label:'eGFR (mL/min/1.73m²)',data:[null,null,113,null,118,null,105,null],min:90,max:null,color:'#1d9bf0',latest:'105 mL/min',latestClass:'val-normal',meta:'Target: ≥90',explain:'Kidney filtration rate. >90 = normal. Naturally declines ~1/year after 40.',status:'All above 90. Normal kidney filtration.'},
+        {id:'urea',label:'Urea (mg/dL)',data:[21,null,22.7,28,28,null,37,null],min:17,max:43,color:'#1d9bf0',latest:'37 mg/dL',latestClass:'val-normal',meta:'Target: 17–43',explain:'Protein breakdown product. High = kidney issues or high protein diet.',status:'Trending up (21→37) but within range. Likely reflects higher protein intake. Kidneys confirmed healthy by creatinine/eGFR.'}
+    ]
+};
+
+// ============ HEALTH SCORE (Trend-Adjusted) ============
+function paramScore(val, optMin, optMax, hardMin, hardMax) {
+    if (val === null) return null;
+    if (val >= optMin && val <= optMax) return 100;
+    if (hardMin !== null && val < hardMin) return Math.max(0, 25 - ((hardMin - val) / hardMin) * 80);
+    if (hardMax !== null && val > hardMax) return Math.max(0, 25 - ((val - hardMax) / hardMax) * 80);
+    if (val < optMin) { var r = optMin - (hardMin||0); return Math.max(20, 100 - ((optMin-val)/(r||1))*80); }
+    if (val > optMax) { var r = (hardMax||optMax*2) - optMax; return Math.max(20, 100 - ((val-optMax)/(r||1))*80); }
+    return 72;
+}
+
+function trendBonus(arr, idx) {
+    // Get last 3 non-null values up to idx
+    var vals = [];
+    for (var i = idx; i >= 0 && vals.length < 3; i--) {
+        if (arr[i] !== null) vals.unshift(arr[i]);
+    }
+    if (vals.length < 2) return 0;
+    // Compute simple trend: improving=positive, worsening=negative
+    var first = vals[0], last = vals[vals.length-1];
+    var change = last - first;
+    // Normalize by first value to get % change
+    var pctChange = (change / (first || 1)) * 100;
+    // Cap at ±10 points
+    return Math.max(-10, Math.min(10, -pctChange * 0.3)); // negative because lower is often better
+}
+
+function persistencePenalty(arr, idx, refMin, refMax) {
+    // Count consecutive out-of-range values ending at idx
+    var count = 0;
+    for (var i = idx; i >= 0; i--) {
+        if (arr[i] === null) continue;
+        var oor = (refMin !== null && arr[i] < refMin) || (refMax !== null && arr[i] > refMax);
+        if (oor) count++;
+        else break;
+    }
+    // Penalty: 0 for 0-1, increasing for persistent
+    return Math.min(15, Math.max(0, (count - 1) * 4));
+}
+
+function calcParamFinal(arr, idx, optMin, optMax, hardMin, hardMax, refMin, refMax, invertTrend) {
+    var val = null;
+    for (var i = idx; i >= 0; i--) { if (arr[i] !== null) { val = arr[i]; break; } }
+    if (val === null) return null;
+    var base = paramScore(val, optMin, optMax, hardMin, hardMax);
+    var trend = trendBonus(arr, idx) * (invertTrend ? -1 : 1);
+    var persist = persistencePenalty(arr, idx, refMin, refMax);
+    return Math.max(0, Math.min(100, Math.round(base * 0.60 + (base + trend) * 0.25 + (base - persist) * 0.15)));
+}
+
+function calcFullScore(idx) {
+    var w = {tsh:0.20,hdl:0.10,ldl:0.08,tg:0.07,hba1c:0.10,glucose:0.05,hb:0.05,wbc:0.05,ast:0.05,alt:0.05,creatinine:0.05,uricacid:0.05,vitd:0.025,vitb12:0.025,sodium:0.03,esr:0.02};
+    var scores = {};
+    // TSH: optimal 0.5-4.5, hard 0.1-15. Higher=worse, so invertTrend
+    scores.tsh = calcParamFinal(chartDefs.thyroid[0].data,idx,0.5,4.5,0.1,15,0.35,4.94,false);
+    // HDL: optimal 45-80. Lower=worse, higher=better. invertTrend=true (rising is good)
+    scores.hdl = calcParamFinal(chartDefs.lipid[0].data,idx,45,80,20,null,40,null,true);
+    scores.ldl = calcParamFinal(chartDefs.lipid[1].data,idx,50,100,null,190,null,100,false);
+    scores.tg = calcParamFinal(chartDefs.lipid[2].data,idx,50,150,null,500,null,150,false);
+    scores.hba1c = calcParamFinal(chartDefs.sugar[0].data,idx,4.0,5.6,3,8,null,5.7,false);
+    scores.glucose = calcParamFinal(chartDefs.sugar[1].data,idx,70,100,50,180,70,100,false);
+    scores.hb = calcParamFinal(chartDefs.cbc[0].data,idx,13.5,16,10,20,13,17,true);
+    scores.wbc = calcParamFinal(chartDefs.cbc[2].data,idx,4,10,2,15,4,10,false);
+    scores.ast = calcParamFinal(chartDefs.liver[0].data,idx,10,40,null,100,null,50,false);
+    scores.alt = calcParamFinal(chartDefs.liver[1].data,idx,10,40,null,100,null,50,false);
+    scores.creatinine = calcParamFinal(chartDefs.kidney[0].data,idx,0.6,1.2,0.3,2.5,0.66,1.25,false);
+    scores.uricacid = calcParamFinal(chartDefs.kidney[1].data,idx,3.5,7.5,2,12,3.5,8.5,false);
+    scores.vitd = calcParamFinal(chartDefs.vitamins[0].data,idx,30,80,10,150,30,100,true);
+    scores.vitb12 = calcParamFinal(chartDefs.vitamins[1].data,idx,211,700,100,1500,211,null,true);
+    scores.sodium = calcParamFinal(chartDefs.electrolytes[0].data,idx,137,145,125,155,137,145,false);
+    scores.esr = calcParamFinal(chartDefs.cbc[3].data,idx,0,10,null,30,0,10,false);
+
+    var totalW=0, totalS=0;
+    for (var k in w) { if (scores[k]!==null&&scores[k]!==undefined) { totalW+=w[k]; totalS+=scores[k]*w[k]; } }
+    return totalW > 0 ? Math.round(totalS/totalW) : null;
+}
+
+var healthScores = dates.map(function(_,i){return calcFullScore(i);});
+
+// ============ RENDER HELPERS ============
+function getColors() {
+    var l = document.body.getAttribute('data-theme')==='light';
+    return {grid:l?'#e1e4e8':'#2f3336',text:l?'#656d76':'#71767b',refBandBg:l?'rgba(82,196,26,0.12)':'rgba(82,196,26,0.08)',refLine:l?'rgba(82,196,26,0.5)':'rgba(82,196,26,0.3)'};
+}
+var chartInstances={};
+function makeChart(canvasId,label,data,refMin,refMax,color){
+    var c=getColors(),ctx=document.getElementById(canvasId).getContext('2d');
+    if(chartInstances[canvasId])chartInstances[canvasId].destroy();
+    var ann={};
+    if(refMin!==null&&refMax!==null){ann.band={type:'box',yMin:refMin,yMax:refMax,backgroundColor:c.refBandBg,borderWidth:0};ann.lMin={type:'line',yMin:refMin,yMax:refMin,borderColor:c.refLine,borderWidth:1,borderDash:[4,4]};ann.lMax={type:'line',yMin:refMax,yMax:refMax,borderColor:c.refLine,borderWidth:1,borderDash:[4,4]};}
+    else if(refMax!==null){ann.lMax={type:'line',yMin:refMax,yMax:refMax,borderColor:c.refLine,borderWidth:1,borderDash:[4,4]};ann.band={type:'box',yMin:0,yMax:refMax,backgroundColor:c.refBandBg,borderWidth:0};}
+    else if(refMin!==null){ann.lMin={type:'line',yMin:refMin,yMax:refMin,borderColor:c.refLine,borderWidth:1,borderDash:[4,4]};}
+    var pc=data.map(function(v){if(v===null)return color;if(refMin!==null&&v<refMin)return'#ff6b6b';if(refMax!==null&&v>refMax)return'#ff6b6b';return'#52c41a';});
+    chartInstances[canvasId]=new Chart(ctx,{type:'line',data:{labels:dates,datasets:[{label:label,data:data,borderColor:color,pointBackgroundColor:pc,pointBorderColor:pc,pointRadius:5,pointHoverRadius:7,tension:.2,spanGaps:true,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},annotation:{annotations:ann},tooltip:{callbacks:{label:function(ctx){var v=ctx.parsed.y,s='';if(refMin!==null&&v<refMin)s=' ⚠️ LOW';else if(refMax!==null&&v>refMax)s=' ⚠️ HIGH';else s=' ✓';return label+': '+v+s;}}}},scales:{y:{grid:{color:c.grid},ticks:{color:c.text}},x:{grid:{display:false},ticks:{color:c.text}}}}});
+}
+
+function renderCards(gridId, defs) {
+    var grid=document.getElementById(gridId); grid.innerHTML='';
+    defs.forEach(function(d){
+        var card=document.createElement('div');card.className='flip-card';
+        card.onclick=function(){card.classList.toggle('flipped');};
+        card.innerHTML='<div class="flip-card-inner"><div class="flip-card-front chart-card"><h3>'+d.label+' <span class="latest-value '+d.latestClass+'">'+d.latest+'</span></h3><div class="chart-meta">'+d.meta+'</div><div class="chart-container"><canvas id="chart-'+d.id+'"></canvas></div><span class="flip-hint">click to flip →</span></div><div class="flip-card-back"><h4>What is '+d.label.split(' (')[0]+'?</h4><p>'+d.explain+'</p><div class="your-status"><strong>Your situation:</strong> '+d.status+'</div></div></div>';
+        grid.appendChild(card);
+    });
+}
+
+function renderScoreBreakdown(){
+    var el=document.getElementById('score-breakdown');
+    var cats=[
+        {name:'Thyroid',score:calcParamFinal(chartDefs.thyroid[0].data,7,0.5,4.5,0.1,15,0.35,4.94,false)},
+        {name:'HDL',score:calcParamFinal(chartDefs.lipid[0].data,7,45,80,20,null,40,null,true)},
+        {name:'LDL/TG',score:Math.round(((calcParamFinal(chartDefs.lipid[1].data,7,50,100,null,190,null,100,false)||70)+(calcParamFinal(chartDefs.lipid[2].data,7,50,150,null,500,null,150,false)||70))/2)},
+        {name:'Blood Sugar',score:calcParamFinal(chartDefs.sugar[0].data,7,4.0,5.6,3,8,null,5.7,false)||100},
+        {name:'Liver',score:Math.round(((calcParamFinal(chartDefs.liver[0].data,7,10,40,null,100,null,50,false)||90)+(calcParamFinal(chartDefs.liver[1].data,7,10,40,null,100,null,50,false)||90))/2)},
+        {name:'Kidney',score:Math.round(((calcParamFinal(chartDefs.kidney[0].data,7,0.6,1.2,0.3,2.5,0.66,1.25,false)||90)+(calcParamFinal(chartDefs.kidney[1].data,7,3.5,7.5,2,12,3.5,8.5,false)||80))/2)}
+    ];
+    el.innerHTML=cats.map(function(c){var s=c.score||50;var col=s>=80?'#52c41a':s>=60?'#ffa940':'#ff6b6b';return'<div class="score-bar-group"><div class="score-bar-label"><span>'+c.name+'</span><span>'+s+'/100</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:'+s+'%;background:'+col+'"></div></div></div>';}).join('');
+}
+
+function buildAllCharts(){
+    Object.keys(chartDefs).forEach(function(s){renderCards('grid-'+s,chartDefs[s]);});
+    Object.keys(chartDefs).forEach(function(s){chartDefs[s].forEach(function(d){makeChart('chart-'+d.id,d.label,d.data,d.min,d.max,d.color);});});
+    // Health score
+    var c=getColors();
+    if(chartInstances['healthscore'])chartInstances['healthscore'].destroy();
+    var ctx=document.getElementById('chart-healthscore').getContext('2d');
+    chartInstances['healthscore']=new Chart(ctx,{type:'line',data:{labels:dates,datasets:[{label:'Health Score',data:healthScores,borderColor:'#1d9bf0',pointBackgroundColor:healthScores.map(function(s){return s>=80?'#52c41a':s>=60?'#ffa940':'#ff6b6b';}),pointBorderColor:healthScores.map(function(s){return s>=80?'#52c41a':s>=60?'#ffa940':'#ff6b6b';}),pointRadius:6,pointHoverRadius:8,tension:.3,spanGaps:true,borderWidth:2.5,fill:{target:'origin',above:'rgba(29,155,240,0.06)'}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},annotation:{annotations:{good:{type:'box',yMin:80,yMax:100,backgroundColor:'rgba(82,196,26,0.05)',borderWidth:0},ok:{type:'box',yMin:60,yMax:80,backgroundColor:'rgba(255,169,64,0.03)',borderWidth:0}}}},scales:{y:{min:35,max:100,grid:{color:c.grid},ticks:{color:c.text}},x:{grid:{display:false},ticks:{color:c.text}}}}});
+    renderScoreBreakdown();
+    var latest=healthScores[healthScores.length-1]; for(var i=healthScores.length-1;i>=0&&latest===null;i--)latest=healthScores[i];
+    document.getElementById('current-score').textContent=latest||'—';
+}
+
+Chart.defaults.font.size=11;
+buildAllCharts();
+</script>
+</body>
+</html>
