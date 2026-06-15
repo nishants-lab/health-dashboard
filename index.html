@@ -6,6 +6,16 @@
     <title>Nishant Sinha — Health Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs" type="module"></script>
+    <script>
+        // PDF.js worker
+        window.addEventListener('DOMContentLoaded', function() {
+            if (window.pdfjsLib) {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+            }
+        });
+    </script>
+    <script src="js/pdf-parser.js" defer></script>
     <style>
         :root { --bg:#0f1419;--bg-card:#1a1f25;--border:#2f3336;--text:#e7e9ea;--text-muted:#71767b;--grid:#2f3336;--flip-bg:#1e2530; }
         [data-theme="light"] { --bg:#f7f9fa;--bg-card:#ffffff;--border:#e1e4e8;--text:#1f2328;--text-muted:#656d76;--grid:#e1e4e8;--flip-bg:#f0f3f6; }
@@ -160,6 +170,7 @@
 <div class="nav-tabs">
     <div class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
     <div class="nav-tab" onclick="switchTab('plan')">🥗 Diet & Workout Plan</div>
+    <div class="nav-tab" onclick="switchTab('upload')">📄 Upload Report</div>
 </div>
 
 <!-- ============ TAB 1: DASHBOARD ============ -->
@@ -350,6 +361,92 @@
     Retest all markers after 12 weeks of adherence to measure progress.
 </div>
 </div>
+
+<!-- ============ TAB 3: UPLOAD REPORT ============ -->
+<div class="tab-content" id="tab-upload">
+<div class="plan-section">
+    <h3>📄 Upload a New Lab Report</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">
+        Drop a PDF lab report here. It will be parsed entirely in your browser — the file never leaves your device.
+        Supports: Tata 1mg, Orange Health, Thyrocare, Healthians, Sparsh Hospital.
+    </p>
+
+    <div id="upload-area" style="border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:24px"
+         ondragover="event.preventDefault();this.style.borderColor='#1d9bf0'"
+         ondragleave="this.style.borderColor=''"
+         ondrop="handleDrop(event)"
+         onclick="document.getElementById('file-input').click()">
+        <div style="font-size:32px;margin-bottom:8px">📁</div>
+        <div style="font-size:14px;font-weight:500">Drop PDF here or click to browse</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Your file stays local — processed in-browser only</div>
+        <input type="file" id="file-input" accept=".pdf" style="display:none" onchange="handleFileSelect(event)">
+    </div>
+
+    <div id="parse-status" style="display:none;margin-bottom:24px">
+        <div id="parse-spinner" style="font-size:14px;color:var(--text-muted)">⏳ Parsing PDF...</div>
+    </div>
+
+    <div id="parse-results" style="display:none">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+            <h4 style="font-size:16px;margin-bottom:12px">✅ Report Parsed Successfully</h4>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px">
+                <div><span style="font-size:12px;color:var(--text-muted)">Date</span><br><strong id="result-date">-</strong></div>
+                <div><span style="font-size:12px;color:var(--text-muted)">Lab</span><br><strong id="result-lab">-</strong></div>
+                <div><span style="font-size:12px;color:var(--text-muted)">Markers Found</span><br><strong id="result-count">-</strong></div>
+            </div>
+            <h4 style="font-size:14px;margin-bottom:8px">Extracted Values</h4>
+            <div id="result-markers" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;font-size:12px"></div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button onclick="saveResults()" style="background:#1d9bf0;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:500;cursor:pointer">💾 Save to Dashboard</button>
+            <button onclick="exportJSON()" style="background:var(--bg-card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px 20px;font-size:13px;font-weight:500;cursor:pointer">📥 Export as JSON</button>
+            <button onclick="clearResults()" style="background:var(--bg-card);color:var(--text-muted);border:1px solid var(--border);border-radius:8px;padding:10px 20px;font-size:13px;font-weight:500;cursor:pointer">✕ Clear</button>
+        </div>
+    </div>
+
+    <div id="saved-reports" style="margin-top:32px">
+        <h4 style="font-size:14px;margin-bottom:12px;color:var(--text-muted)">📋 Saved Reports (browser storage)</h4>
+        <div id="saved-list"></div>
+    </div>
+</div>
+</div>
+
+<script>
+// ============ UPLOAD HANDLERS ============
+var lastParsedResult = null;
+function handleDrop(e) { e.preventDefault(); e.currentTarget.style.borderColor=''; if(e.dataTransfer.files.length>0&&e.dataTransfer.files[0].type==='application/pdf')processFile(e.dataTransfer.files[0]); }
+function handleFileSelect(e) { if(e.target.files.length>0)processFile(e.target.files[0]); }
+async function processFile(file) {
+    document.getElementById('parse-status').style.display='block';
+    document.getElementById('parse-results').style.display='none';
+    document.getElementById('parse-spinner').textContent='⏳ Parsing '+file.name+'...';
+    try { var r=await LabParser.parsePDF(file); lastParsedResult=r; showResults(r); }
+    catch(err) { document.getElementById('parse-spinner').textContent='❌ Error: '+err.message; }
+}
+function showResults(r) {
+    document.getElementById('parse-status').style.display='none';
+    document.getElementById('parse-results').style.display='block';
+    document.getElementById('result-date').textContent=r.date||'Could not detect';
+    document.getElementById('result-lab').textContent=r.lab;
+    document.getElementById('result-count').textContent=r.markersFound+' markers';
+    var c=document.getElementById('result-markers'); c.innerHTML='';
+    for(var key in r.markers){
+        var md=LabParser.MARKERS.find(function(m){return m.key===key;});
+        var name=md?md.names[0].replace(/\\\\/g,'').replace(/\\[()]/g,'').split('|')[0]:key;
+        var d=document.createElement('div');
+        d.style.cssText='padding:6px 10px;background:var(--flip-bg);border-radius:6px';
+        d.innerHTML='<span style="color:var(--text-muted)">'+name+'</span><br><strong>'+r.markers[key]+'</strong> <span style="font-size:11px;color:var(--text-muted)">'+(md?md.unit:'')+'</span>';
+        c.appendChild(d);
+    }
+    renderSavedReports();
+}
+function saveResults(){if(!lastParsedResult)return;var s=JSON.parse(localStorage.getItem('healthReports')||'[]');s.push(lastParsedResult);s.sort(function(a,b){return(a.date||'').localeCompare(b.date||'');});localStorage.setItem('healthReports',JSON.stringify(s));renderSavedReports();alert('Saved! The dashboard will use this data on next reload.');}
+function exportJSON(){if(!lastParsedResult)return;var b=new Blob([JSON.stringify(lastParsedResult,null,2)],{type:'application/json'});var u=URL.createObjectURL(b);var a=document.createElement('a');a.href=u;a.download=(lastParsedResult.date||'report')+'_parsed.json';a.click();URL.revokeObjectURL(u);}
+function clearResults(){document.getElementById('parse-results').style.display='none';lastParsedResult=null;}
+function renderSavedReports(){var s=JSON.parse(localStorage.getItem('healthReports')||'[]');var c=document.getElementById('saved-list');if(!c)return;if(s.length===0){c.innerHTML='<div style="font-size:12px;color:var(--text-muted)">No reports saved yet. Upload a PDF above.</div>';return;}c.innerHTML=s.map(function(r,i){return'<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--flip-bg);border-radius:8px;margin-bottom:6px;font-size:12px"><div><strong>'+(r.date||'Unknown')+'</strong> — '+r.lab+' ('+r.markersFound+' markers)</div><button onclick="deleteReport('+i+')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px">🗑️</button></div>';}).join('');}
+function deleteReport(i){var s=JSON.parse(localStorage.getItem('healthReports')||'[]');s.splice(i,1);localStorage.setItem('healthReports',JSON.stringify(s));renderSavedReports();}
+document.addEventListener('DOMContentLoaded',renderSavedReports);
+</script>
 
 <script>
 // ============ TABS ============
