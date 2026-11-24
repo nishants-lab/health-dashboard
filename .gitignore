@@ -1,0 +1,20 @@
+﻿# PDFs (health reports - never commit)
+*.pdf
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# Local data exports
+*.csv
+*.xlsx
+exports/
+
+# Node (if we ever add build tooling)
+node_modules/

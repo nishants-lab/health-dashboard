@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Health Dashboard</title>
+<meta name="theme-color" content="#0b0f14">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="stylesheet" href="css/main.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<script type="module">
+  import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs";
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs";
+  window.pdfjsLib = pdfjsLib;
+</script>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><defs><linearGradient id="bm-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3ad07f"/><stop offset="1" stop-color="#22b39c"/></linearGradient></defs><rect x="0" y="0" width="32" height="32" rx="8" fill="url(#bm-g)"/><path d="M4 16.5 H10.4 L12.6 11 L15.7 22 L18.2 14 L20.1 16.5 H28" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="brand-text">Health Dashboard<small id="hero-sub"></small></span></div>
+    <nav class="header-tabs" role="tablist" aria-label="Sections">
+      <button class="header-tab" data-tab="dashboard" role="tab" aria-selected="true">Dashboard</button>
+      <button class="header-tab" data-tab="plan" role="tab" aria-selected="false">Diet &amp; Workout</button>
+      <button class="header-tab" data-tab="upload" role="tab" aria-selected="false">Upload Report</button>
+    </nav>
+    <button class="theme-btn" id="theme-btn" aria-label="Toggle theme">\u263e</button>
+  </div>
+  <div class="chips-row" id="chips-row"><div id="chips"></div></div>
+</header>
+
+<main class="page">
+
+<section class="tab-panel" id="tab-dashboard">
+  <div class="hero">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 168 168" width="100%" height="100%">
+        <circle class="ring-track" cx="84" cy="84" r="74"></circle>
+        <circle class="ring-val" id="ring-val" cx="84" cy="84" r="74"></circle>
+      </svg>
+      <div class="ring-center"><div><div class="num" id="ring-num">-</div><div class="cap">out of 100</div></div></div>
+    </div>
+    <div class="hero-right">
+      <h2>Overall Health Score <span class="delta-chip" id="hero-delta"></span></h2>
+      <div class="hero-sub" id="hero-date"></div>
+      <div class="breakdown" id="breakdown"></div>
+    </div>
+    <div class="score-trend"><canvas id="chart-score" aria-label="Health score over time" role="img"></canvas></div>
+    <div class="hero-foot">
+      <details>
+        <summary>Scoring methodology</summary>
+        <p>Composite of current value (60%), trend direction over the last 3 readings (25%), and a persistence penalty for consecutive out-of-range results (15%). Weights: Thyroid 20% &middot; Lipid 25% (HDL 10%, LDL 8%, TG 7%) &middot; Blood Sugar 15% &middot; CBC 10% &middot; Liver 10% &middot; Kidney 10% &middot; Vitamins 5% &middot; Electrolytes 5%. Max score is 100, achievable through the right combination of medication, diet and exercise. Weights are informed by Framingham Risk Score components, ATA hypothyroidism guidelines, and LAI-2020 Indian cardiovascular risk data. This is a personal heuristic, not a diagnostic tool.</p>
+      </details>
+    </div>
+  </div>
+
+  <div class="digest" id="digest" hidden>
+    <h3>Since your last report</h3>
+    <div class="digest-chips" id="digest-chips"></div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="footnote" id="note-foot"></div>
+</section>
+
+<section class="tab-panel" id="tab-plan" hidden>
+  <div class="plan-section">
+    <h3>Parameters to fix &amp; strategy</h3>
+    <p class="plan-intro">Ranked by priority. Each card lists the specific levers for that marker and why they work.</p>
+    <div class="plan-grid">
+      <div class="plan-card">
+        <h4>TSH (hypothyroid) - 9.07 to target &lt;4.94</h4>
+        <span class="target-badge">Diet + exercise + stress management, no medication</span>
+        <ul>
+          <li><b>Selenium</b> - 3 Brazil nuts/day (~200 &micro;g). Supports T4 to T3 conversion and reduces thyroid antibodies</li>
+          <li><b>Zinc</b> - pumpkin seeds (2 tbsp/day), lentils, chickpeas. Required for TSH receptor signaling</li>
+          <li><b>Iodine</b> - iodized salt as normal in cooking; do not supplement further, excess can worsen things</li>
+          <li><b>Cook cruciferous vegetables</b> - broccoli, cauliflower, cabbage are fine cooked; raw goitrogens interfere with iodine uptake</li>
+          <li><b>Avoid excess soy</b> - moderate tofu is fine, do not overdo soy milk/protein</li>
+          <li><b>Gluten awareness</b> - Anti-TPO is negative, so no Hashimoto's; gluten-free trial not needed</li>
+          <li><b>Stress management</b> - high cortisol suppresses thyroid function; yoga, meditation, sleep quality matter</li>
+          <li><b>Exercise</b> - moderate cardio improves thyroid hormone sensitivity; avoid over-exercising</li>
+          <li><b>Vitamin D</b> - maintain above 40 ng/mL; deficiency correlates with thyroid autoimmunity</li>
+          <li><b>Sleep</b> - 7 to 8 hours; TSH peaks during sleep, disrupted sleep disrupts the thyroid axis</li>
+        </ul>
+        <div class="why">Anti-TPO is negative, confirming this is not autoimmune. Non-autoimmune subclinical hypothyroidism responds well to lifestyle changes. Retest after 12 weeks; reconsider medication if TSH rises above 10 or symptoms worsen.</div>
+      </div>
+      <div class="plan-card">
+        <h4>HDL - 35 to target &gt;45</h4>
+        <span class="target-badge">Exercise + diet + time</span>
+        <ul>
+          <li><b>Aerobic exercise 150+ min/week</b> - the single biggest HDL raiser (5 to 10% increase per meta-analyses)</li>
+          <li>Omega-3: 2 tbsp ground flaxseed/day + walnuts + algae-based DHA capsule</li>
+          <li>Monounsaturated fats: 1 to 2 tbsp extra-virgin olive oil daily, avocado, almonds</li>
+          <li>Eliminate trans fats completely (fried snacks, bakery items with vanaspati)</li>
+          <li>Coconut oil in moderation - raises HDL but also raises LDL</li>
+          <li>Lose visceral fat - even 3 to 5 kg loss improves HDL</li>
+        </ul>
+        <div class="why">HDL is the hardest lipid to raise through diet alone. Sustained aerobic exercise is the #1 lever; thyroid improvement adds another 5 to 15%.</div>
+      </div>
+      <div class="plan-card">
+        <h4>LDL - 112 to target &lt;100</h4>
+        <span class="target-badge">Diet modification</span>
+        <ul>
+          <li>Soluble fiber: 10 to 25g/day (oats, barley, beans, psyllium husk)</li>
+          <li>Plant sterols/stanols: 2g/day (fortified spreads or supplements)</li>
+          <li>Reduce saturated fat to &lt;7% of calories (limit ghee, coconut oil, full-fat dairy)</li>
+          <li>Almonds - a handful (~15) daily. 5 to 7% LDL reduction (Sabate et al., JAMA 2003)</li>
+          <li>Soy protein 25g/day (tofu, soy milk, edamame)</li>
+          <li>Thyroid improvement alone can reduce LDL by 10 to 20%</li>
+        </ul>
+        <div class="why">Borderline LDL is achievable with diet alone if thyroid is fixed; no statin needed at current levels.</div>
+      </div>
+      <div class="plan-card">
+        <h4>Triglycerides - 161 to target &lt;150</h4>
+        <span class="target-badge">Diet timing + carb control</span>
+        <ul>
+          <li><b>Reduce refined carbs</b> - white rice, white bread, maida, sugar</li>
+          <li>Limit fructose (fruit juice, soft drinks, sweets)</li>
+          <li>Omega-3 fatty acids (same as HDL plan - 2 to 4g/day)</li>
+          <li>Avoid large meals at night - spread intake across the day</li>
+          <li>12-hour overnight fast (for example 8pm to 8am)</li>
+          <li>Replace refined carbs with complex: brown rice, millets, whole wheat</li>
+        </ul>
+        <div class="why">TG swings 108 to 207 - highly diet-responsive. A carb-heavy dinner the night before testing can spike it 30 to 50 mg/dL.</div>
+      </div>
+      <div class="plan-card">
+        <h4>Uric Acid - 8.0 to target &lt;7.0</h4>
+        <span class="target-badge">Diet + hydration</span>
+        <ul>
+          <li><b>Water: 3+ liters/day</b> - flushes uric acid via kidneys</li>
+          <li>Limit high-purine foods: mushrooms (moderate), spinach (moderate), asparagus</li>
+          <li>Limit beer and spirits</li>
+          <li>Reduce fructose (raises uric acid via purine metabolism)</li>
+          <li>Cherry/cherry juice - some evidence for uric acid reduction</li>
+          <li>Low-fat dairy (milk, yogurt) - protective effect</li>
+          <li>Vitamin C 500mg/day - modest uric acid lowering</li>
+        </ul>
+        <div class="why">Trending 6.9 to 8.0 over two years - still in range but approaching gout territory (&gt;8.5). Hypothyroidism also raises uric acid.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="plan-section">
+    <h3>Daily diet plan</h3>
+    <p class="plan-intro">Vegetarian + eggs, ~1800 to 2000 kcal/day. Designed for: raise HDL, lower LDL, lower TG, lower uric acid, thyroid support. Adjust portions to activity level.</p>
+    <div class="table-scroll">
+      <table class="meal-table">
+        <thead><tr><th>Time</th><th>Meal</th><th>What to eat</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>7:00 AM</td><td>Morning</td><td>Warm water + lemon. Black coffee or green tea after 15 min.</td><td>Hydration. Caffeine mildly supports HDL.</td></tr>
+          <tr><td>8:00 AM</td><td>Breakfast</td><td><strong>A:</strong> Oats (half cup) with milk + 4 to 5 walnut halves + 1 tbsp ground flaxseed + berries/banana + 2 boiled eggs<br><strong>B:</strong> 2 moong dal chilla + mint chutney + 1 boiled egg + almonds<br><strong>C:</strong> Greek yogurt (200g) + chia seeds + mixed nuts + fruit</td><td>Soluble fiber lowers LDL. Omega-3 raises HDL. Protein for satiety.</td></tr>
+          <tr><td>10:30 AM</td><td>Mid-morning</td><td>1 fruit (apple/guava/pear) + 3 Brazil nuts</td><td>Selenium for thyroid - 3 small nuts covers a full day.</td></tr>
+          <tr><td>1:00 PM</td><td>Lunch</td><td><strong>Base:</strong> Brown rice (3/4 cup) or 2 multigrain rotis<br><strong>Protein:</strong> Dal (1.5 cups) / rajma / paneer (75g) / tofu<br><strong>Veggies:</strong> Cooked sabzi + salad with olive oil<br><strong>Side:</strong> Buttermilk or raita</td><td>Complex carbs lower TG. Olive oil raises HDL. Cook cruciferous vegs for thyroid.</td></tr>
+          <tr><td>4:30 PM</td><td>Evening snack</td><td>Handful of almonds (~12 to 15) + green tea, or roasted chana + buttermilk, or egg omelette on multigrain toast</td><td>Almonds lower LDL. Normal snacking amount.</td></tr>
+          <tr><td>7:30 PM</td><td>Dinner</td><td><strong>A:</strong> Palak paneer (low oil) + 1 roti + salad<br><strong>B:</strong> Khichdi + 1 tsp ghee + papad + raita<br><strong>C:</strong> Veg stir-fry with tofu + quinoa/millets<br><strong>D:</strong> 2-egg omelette + veggies + toast + soup</td><td>Light dinner lowers overnight TG. Low carbs at night.</td></tr>
+          <tr><td>9:00 PM</td><td>Post-dinner</td><td>Warm turmeric milk (low-fat) + pinch of black pepper, or chamomile tea</td><td>Anti-inflammatory. 11-hour fast begins.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="meal-cards">
+      <div class="meal-item"><div class="t">7:00 AM</div><div class="n">Morning</div><div class="c">Warm water + lemon. Black coffee/green tea after 15 min.</div><div class="w">Hydration; caffeine mildly supports HDL.</div></div>
+      <div class="meal-item"><div class="t">8:00 AM</div><div class="n">Breakfast</div><div class="c"><b>A:</b> Oats + walnuts + flaxseed + berries + 2 eggs<br><b>B:</b> Moong dal chilla + egg + almonds<br><b>C:</b> Greek yogurt + chia + nuts + fruit</div><div class="w">Fiber lowers LDL, omega-3 raises HDL.</div></div>
+      <div class="meal-item"><div class="t">10:30 AM</div><div class="n">Mid-morning</div><div class="c">1 fruit + 3 Brazil nuts</div><div class="w">Selenium for thyroid.</div></div>
+      <div class="meal-item"><div class="t">1:00 PM</div><div class="n">Lunch</div><div class="c">Brown rice/rotis + dal/paneer/tofu + cooked sabzi + salad + buttermilk</div><div class="w">Complex carbs lower TG, olive oil raises HDL.</div></div>
+      <div class="meal-item"><div class="t">4:30 PM</div><div class="n">Evening snack</div><div class="c">Handful almonds + green tea, or roasted chana + buttermilk</div><div class="w">Almonds lower LDL.</div></div>
+      <div class="meal-item"><div class="t">7:30 PM</div><div class="n">Dinner</div><div class="c">Palak paneer / khichdi / tofu stir-fry / egg omelette - light, low carb</div><div class="w">Lowers overnight TG.</div></div>
+      <div class="meal-item"><div class="t">9:00 PM</div><div class="n">Post-dinner</div><div class="c">Turmeric milk with black pepper, or chamomile tea</div><div class="w">Anti-inflammatory; 11-hour fast begins.</div></div>
+    </div>
+    <p class="plan-intro" style="margin-top:14px">
+      <b>Supplements:</b> algae-based omega-3 DHA/EPA (1 to 2g/day) &middot; vitamin D3 (1000 IU/day) &middot; vitamin B12 methylcobalamin (1000 &micro;g/day) &middot; vitamin C (500mg) &middot; ground flaxseed daily &middot; isabgol/psyllium husk (1 to 2 tsp before dinner)
+      <br><b>Nuts clarification:</b> "3 Brazil nuts" means 3 individual small nuts. "A handful of almonds" means 12 to 15 pieces.
+      <br><b>Avoid:</b> fried foods, maida products, sugary drinks, excess white rice at dinner, trans fat, raw cruciferous in large amounts, excess soy beyond 1 serving/day
+    </p>
+    <div class="safety-box">
+      <strong>Critical safety notes - do not skip</strong>
+      <ul>
+        <li><b>Isabgol (psyllium husk):</b> always take with at least 1 full glass (250 mL) of water immediately, then another glass within 15 to 20 min. Without enough water it can swell and block the throat or intestines. Never take it dry.</li>
+        <li><b>Isabgol timing:</b> take 2 hours away from thyroid supplements, iron, calcium, or any medication - it blocks absorption.</li>
+        <li><b>Brazil nuts:</b> do not eat more than 3 to 4/day. Excess selenium causes selenosis (hair loss, nail brittleness, nausea). 3 is therapeutic, 10 is toxic.</li>
+        <li><b>Flaxseed:</b> must be ground - whole seeds pass through undigested. Store ground flaxseed in the fridge, it oxidizes quickly at room temperature.</li>
+        <li><b>Turmeric milk:</b> always add a pinch of black pepper - without it curcumin absorption is near zero.</li>
+        <li><b>Green tea + iron:</b> do not drink green tea with meals - tannins block iron absorption. Drink 1 hour before or after eating.</li>
+        <li><b>Water baseline:</b> the fiber in this plan (oats, isabgol, flaxseed, beans) needs adequate hydration - minimum 3 liters/day.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="plan-section">
+    <h3>Weekly workout plan</h3>
+    <p class="plan-intro">Primary goal: raise HDL via sustained aerobic exercise. Secondary: lower visceral fat and LDL, improve insulin sensitivity. 5 days/week, 45 to 60 min sessions.</p>
+    <div class="week-grid">
+      <div class="day-card"><strong>Monday</strong>Zone 2 cardio - 45 min brisk walk/jog/cycle, HR 120 to 140 bpm<br><em>Best HDL stimulus</em></div>
+      <div class="day-card"><strong>Tuesday</strong>Strength (upper) - push-ups, rows, OHP, curls, 3x12<br>+ 15 min walk cooldown</div>
+      <div class="day-card"><strong>Wednesday</strong>Zone 2 cardio - 45 min swim/cycle/elliptical<br><em>Best HDL stimulus</em></div>
+      <div class="day-card"><strong>Thursday</strong>Strength (lower) - squats, lunges, deadlifts, calf raises, 3x12<br>+ 15 min walk cooldown</div>
+      <div class="day-card"><strong>Friday</strong>HIIT / sport - 4 min hard, 2 min easy x5, or badminton/football/tennis<br><em>Lowers TG, raises insulin sensitivity</em></div>
+      <div class="day-card"><strong>Saturday</strong>Active recovery - 45 to 60 min brisk walk or yoga<br><em>Lower cortisol helps TSH</em></div>
+      <div class="day-card"><strong>Sunday</strong>Rest or light - gentle walk, stretching, or full rest<br><em>Recovery</em></div>
+    </div>
+    <p class="plan-intro" style="margin-top:14px">
+      150+ min/week of moderate aerobic exercise raises HDL by 5 to 10% (Kodama et al., Archives of Internal Medicine, 2007). Zone 2 cardio - where you can hold a conversation but feel effort - is the most effective intensity for HDL. Strength training improves insulin sensitivity and lowers LDL, with less direct HDL effect than cardio.
+      <br><b>Minimum viable version:</b> 3 days of 45-min Zone 2 cardio (Mon/Wed/Sat) moves HDL more than any diet change alone.
+      <br><b>Progression:</b> weeks 1 to 4 build consistency, weeks 5 to 8 increase duration/intensity by 10%. Retest lipids after 12 weeks.
+    </p>
+  </div>
+
+  <div class="plan-section">
+    <h3>Expected timeline</h3>
+    <div class="table-scroll">
+      <table class="plain-table">
+        <thead><tr><th>Marker</th><th>Current</th><th>Target</th><th>Expected timeline</th><th>Primary lever</th></tr></thead>
+        <tbody>
+          <tr><td>TSH</td><td>9.07</td><td>&lt;4.94</td><td>12 to 16 weeks (slower without medication)</td><td>Selenium, zinc, stress management, exercise, sleep</td></tr>
+          <tr><td>HDL</td><td>35</td><td>&gt;45</td><td>3 to 6 months of consistent exercise</td><td>Aerobic exercise, omega-3, thyroid improvement</td></tr>
+          <tr><td>LDL</td><td>112</td><td>&lt;100</td><td>8 to 12 weeks with diet + thyroid fix</td><td>Fiber, reduced saturated fat, thyroid</td></tr>
+          <tr><td>Triglycerides</td><td>161</td><td>&lt;150</td><td>2 to 4 weeks with carb reduction</td><td>Diet - reduce refined carbs/sugar</td></tr>
+          <tr><td>Uric Acid</td><td>8.0</td><td>&lt;7.0</td><td>4 to 8 weeks with hydration + diet</td><td>Water intake, purine reduction</td></tr>
+          <tr><td>Chol/HDL Ratio</td><td>5.1</td><td>&lt;4.5</td><td>3 to 6 months, follows HDL</td><td>HDL improvement is the driver</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <b>Disclaimer:</b> not medical advice. A data-driven plan based on published clinical guidelines (AHA, NCEP ATP III, LAI-2020, ATA, ADA). Consult an endocrinologist for thyroid medication decisions and a physician before starting a new exercise program. Retest all markers after 12 weeks of adherence.
+  </div>
+</section>
+
+<section class="tab-panel" id="tab-upload" hidden>
+  <div class="plan-section">
+    <h3>Upload a new lab report</h3>
+    <p class="plan-intro">Drop a PDF lab report. It is parsed entirely in your browser, so the file itself never leaves your device. Extracted values are shown for review, then saved to your GitHub repo so they are available on any device. Supports Tata 1mg, Orange Health, Thyrocare, Healthians, Sparsh Hospital and most tabular formats.</p>
+
+    <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload PDF lab report">
+      <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      <div class="big">Drop PDF here, or click to browse</div>
+      <div class="small">The PDF is read in your browser; only the reviewed values are saved</div>
+      <input type="file" id="file-input" accept=".pdf" hidden>
+    </div>
+
+    <div id="parse-status" hidden style="font-size:var(--fs-sm);color:var(--text-2);margin-bottom:16px"></div>
+
+    <div id="review" class="review-card" hidden>
+      <h4>Review before saving</h4>
+      <div class="review-meta">
+        <div><span class="k">Report date</span><input type="date" id="rv-date"></div>
+        <div><span class="k">Detected lab</span><span id="rv-lab">-</span></div>
+        <div><span class="k">Coverage</span><span id="rv-count">-</span></div>
+        <div><span class="k">File</span><span id="rv-file">-</span></div>
+      </div>
+      <div class="table-scroll">
+        <table class="review-table">
+          <thead><tr><th>Marker</th><th>Value</th><th>Confidence</th><th>Last report</th></tr></thead>
+          <tbody id="rv-tbody"></tbody>
+        </table>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--text-3);margin-top:10px">Rows flagged "check" or "big jump vs last" were extracted with lower confidence, so verify them against the PDF before saving. All fields are editable.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-save">Save to GitHub</button>
+        <button class="btn btn-ghost" id="btn-export">Export as JSON</button>
+        <button class="btn btn-ghost" id="btn-clear">Discard</button>
+      </div>
+    </div>
+
+    <div class="gh-panel">
+      <h4>GitHub sync</h4>
+      <p class="gh-help">Reports are saved into <code>data/baseline.json</code> in your GitHub repo, so the dashboard shows the same data on every device. Reading needs nothing; saving needs a token with write access to the repo. The token is kept only for this browser session and is never stored on disk.</p>
+      <div class="gh-grid">
+        <label>Owner<input type="text" id="gh-owner" autocomplete="off" spellcheck="false"></label>
+        <label>Repo<input type="text" id="gh-repo" autocomplete="off" spellcheck="false"></label>
+        <label>Branch<input type="text" id="gh-branch" autocomplete="off" spellcheck="false"></label>
+      </div>
+      <div class="gh-token-row">
+        <span class="gh-state off" id="gh-token-state">No token set</span>
+        <button class="btn btn-ghost" id="gh-token-btn" type="button">Set token</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<nav class="bottom-nav" aria-label="Sections">
+  <button data-tab="dashboard" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l2-2 4 4 8-8 4 4"/></svg>Dashboard</button>
+  <button data-tab="plan" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5a1 1 0 0 1 1-1h10l5 5v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M14 4v5h5"/></svg>Plan</button>
+  <button data-tab="upload" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Upload</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

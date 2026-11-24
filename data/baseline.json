@@ -1,0 +1,1005 @@
+{
+ "profile": {
+  "sex": "Male",
+  "age": 38
+ },
+ "reports": [
+  {
+   "id": "2022-04-01",
+   "label": "Apr 2022"
+  },
+  {
+   "id": "2022-12-18",
+   "label": "Dec 2022"
+  },
+  {
+   "id": "2023-03-03",
+   "label": "Mar 2023"
+  },
+  {
+   "id": "2024-06-07",
+   "label": "Jun 2024"
+  },
+  {
+   "id": "2025-05-09",
+   "label": "May 2025"
+  },
+  {
+   "id": "2026-02-07",
+   "label": "Feb 2026"
+  },
+  {
+   "id": "2026-04-12",
+   "label": "Apr 2026"
+  },
+  {
+   "id": "2026-06-14",
+   "label": "Jun 2026"
+  },
+  {
+   "id": "2026-09-06",
+   "label": "Sep 2026"
+  }
+ ],
+ "sections": [
+  {
+   "id": "thyroid",
+   "title": "Thyroid Function",
+   "priority": "high",
+   "badge": "Consistently Out of Range"
+  },
+  {
+   "id": "lipid",
+   "title": "Lipid Profile",
+   "priority": "high",
+   "badge": "HDL Persistently Low"
+  },
+  {
+   "id": "vitamins",
+   "title": "Vitamins",
+   "priority": "medium",
+   "badge": "Previously Deficient, Now Recovered"
+  },
+  {
+   "id": "electrolytes",
+   "title": "Electrolytes",
+   "priority": "medium",
+   "badge": "Sodium Dipped in Apr 2026"
+  },
+  {
+   "id": "sugar",
+   "title": "Blood Sugar",
+   "priority": "normal",
+   "badge": "Consistently Normal"
+  },
+  {
+   "id": "cbc",
+   "title": "Complete Blood Count",
+   "priority": "normal",
+   "badge": "Stable & Normal"
+  },
+  {
+   "id": "liver",
+   "title": "Liver Function",
+   "priority": "normal",
+   "badge": "Always Normal"
+  },
+  {
+   "id": "kidney",
+   "title": "Kidney Function",
+   "priority": "normal",
+   "badge": "Uric Acid Trending Up"
+  }
+ ],
+ "markers": [
+  {
+   "id": "tsh",
+   "section": "thyroid",
+   "name": "TSH",
+   "unit": "µIU/mL",
+   "data": [
+    12.75,
+    6.07,
+    15.14,
+    7.72,
+    11.24,
+    8.43,
+    8.33,
+    9.07,
+    6.56
+   ],
+   "ref": {
+    "min": 0.35,
+    "max": 4.94
+   },
+   "meta": "Target: 0.35-4.94 | Elevated in ALL tests",
+   "explain": "TSH signals the thyroid to produce hormones. High TSH = underactive thyroid (hypothyroidism). The pituitary gland is working overtime to compensate.",
+   "status": "Consistently 2-3× upper limit since 2022. Subclinical hypothyroidism confirmed (T3/T4 normal). Cascading effects: raises LDL, lowers HDL, causes fatigue, weight gain. Medication dose likely needs adjustment.",
+   "scoring": {
+    "optMin": 0.5,
+    "optMax": 4.5,
+    "hardMin": 0.1,
+    "hardMax": 15,
+    "invertTrend": false,
+    "weight": 0.2,
+    "refMin": 0.35,
+    "refMax": 4.94
+   }
+  },
+  {
+   "id": "ft3",
+   "section": "thyroid",
+   "name": "Free T3",
+   "unit": "pg/mL",
+   "data": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    2.55,
+    null,
+    2.35,
+    null
+   ],
+   "ref": {
+    "min": 1.58,
+    "max": 3.91
+   },
+   "meta": "Target: 1.58-3.91 | Always normal",
+   "explain": "Free T3 is the active thyroid hormone driving metabolism. Normal Free T3 with high TSH = subclinical hypothyroidism.",
+   "status": "Normal, your body still converts enough T4 to T3. But this may not hold if TSH keeps rising."
+  },
+  {
+   "id": "ft4",
+   "section": "thyroid",
+   "name": "Free T4",
+   "unit": "ng/dL",
+   "data": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    1.06,
+    null,
+    1.03,
+    null
+   ],
+   "ref": {
+    "min": 0.7,
+    "max": 1.48
+   },
+   "meta": "Target: 0.7-1.48 | Always normal",
+   "explain": "Free T4 is the storage hormone. The body converts it to active T3 as needed.",
+   "status": "Normal but mid-low range. If this drops below 0.7 with rising TSH, you'd move from subclinical to overt hypothyroidism."
+  },
+  {
+   "id": "tt3",
+   "section": "thyroid",
+   "name": "Total T3",
+   "unit": "ng/mL",
+   "data": [
+    null,
+    0.9,
+    1.02,
+    null,
+    1.25,
+    null,
+    0.97,
+    null,
+    0.96
+   ],
+   "ref": {
+    "min": 0.35,
+    "max": 1.93
+   },
+   "meta": "Target: 0.35-1.93 | Always normal",
+   "explain": "Total T3 measures all triiodothyronine in the blood (both bound and free). Normal Total T3 alongside a high TSH points to subclinical rather than overt hypothyroidism.",
+   "status": "Normal in every test where it was measured. The thyroid still produces enough active hormone despite the raised TSH."
+  },
+  {
+   "id": "tt4",
+   "section": "thyroid",
+   "name": "Total T4",
+   "unit": "µg/dL",
+   "data": [
+    null,
+    8.3,
+    9.6,
+    null,
+    9.16,
+    null,
+    8.08,
+    null,
+    8.6
+   ],
+   "ref": {
+    "min": 4.87,
+    "max": 11.72
+   },
+   "meta": "Target: 4.87-11.72 | Always normal",
+   "explain": "Total T4 measures all thyroxine in the blood. The body converts T4 to active T3 as needed. Normal T4 with a high TSH means the thyroid is keeping output up under pituitary pressure.",
+   "status": "Normal in every test where it was measured."
+  },
+  {
+   "id": "hdl",
+   "section": "lipid",
+   "name": "HDL",
+   "unit": "mg/dL",
+   "data": [
+    32.3,
+    37,
+    40,
+    34,
+    28,
+    31,
+    33,
+    35,
+    39
+   ],
+   "ref": {
+    "min": 40,
+    "max": null
+   },
+   "meta": "Target: >40 (ideally >50) | Below range in ALL tests",
+   "explain": "HDL removes excess cholesterol from arteries. Low HDL is an independent cardiovascular risk factor, especially prevalent in Indians (~66% have low HDL per LAI-2020).",
+   "status": "Never been in range across 4 years (28-40). Slightly improving trend (28 to 35). Driven by hypothyroidism + likely sedentary lifestyle. Exercise is the #1 lever.",
+   "scoring": {
+    "optMin": 45,
+    "optMax": 80,
+    "hardMin": 20,
+    "hardMax": null,
+    "invertTrend": true,
+    "weight": 0.1,
+    "refMin": 40,
+    "refMax": null
+   }
+  },
+  {
+   "id": "ldl",
+   "section": "lipid",
+   "name": "LDL",
+   "unit": "mg/dL",
+   "data": [
+    116.1,
+    114,
+    105,
+    128.71,
+    112,
+    100,
+    128,
+    112,
+    120
+   ],
+   "ref": {
+    "min": null,
+    "max": 100
+   },
+   "meta": "Target: <100 | Borderline-high",
+   "explain": "LDL deposits cholesterol in artery walls. Primary target for cardiovascular risk reduction per NCEP/LAI guidelines.",
+   "status": "Fluctuates 100-129. Borderline. Hypothyroidism directly raises LDL, fixing TSH could bring this below 100 without medication.",
+   "scoring": {
+    "optMin": 50,
+    "optMax": 100,
+    "hardMin": null,
+    "hardMax": 190,
+    "invertTrend": false,
+    "weight": 0.08,
+    "refMin": null,
+    "refMax": 100
+   }
+  },
+  {
+   "id": "tg",
+   "section": "lipid",
+   "name": "Triglycerides",
+   "unit": "mg/dL",
+   "data": [
+    207,
+    101,
+    158,
+    108,
+    183,
+    186,
+    110,
+    161,
+    100
+   ],
+   "ref": {
+    "min": null,
+    "max": 150
+   },
+   "meta": "Target: <150 | Highly diet-responsive",
+   "explain": "Triglycerides are dietary fats. High TG = cardiovascular risk, especially in Indians with atherogenic dyslipidemia (high TG + low HDL + high LDL).",
+   "status": "Swings 108-207. Very sensitive to what you ate the night before testing. When controlled (Jun 2024: 108), your VLDL and ratios normalize too.",
+   "scoring": {
+    "optMin": 50,
+    "optMax": 150,
+    "hardMin": null,
+    "hardMax": 500,
+    "invertTrend": false,
+    "weight": 0.07,
+    "refMin": null,
+    "refMax": 150
+   }
+  },
+  {
+   "id": "tc",
+   "section": "lipid",
+   "name": "Total Cholesterol",
+   "unit": "mg/dL",
+   "data": [
+    176,
+    171,
+    156,
+    158,
+    177,
+    168,
+    183,
+    179,
+    179
+   ],
+   "ref": {
+    "min": null,
+    "max": 200
+   },
+   "meta": "Target: <200 | Always within range",
+   "explain": "Sum of all cholesterol fractions. A blunt instrument, can mask bad composition (low HDL + high LDL).",
+   "status": "Always normal, but your composition is unfavorable. Total cholesterol alone is misleading in your case."
+  },
+  {
+   "id": "vldl",
+   "section": "lipid",
+   "name": "VLDL",
+   "unit": "mg/dL",
+   "data": [
+    41.5,
+    20,
+    31.62,
+    22,
+    37,
+    37,
+    22,
+    32,
+    20
+   ],
+   "ref": {
+    "min": null,
+    "max": 30
+   },
+   "meta": "Target: <30 | Tracks with triglycerides",
+   "explain": "VLDL carries triglycerides. Calculated as TG/5. High VLDL = high TG being circulated.",
+   "status": "Directly follows your TG, when TG is controlled, VLDL normalizes. Fix TG and VLDL fixes itself."
+  },
+  {
+   "id": "cholratio",
+   "section": "lipid",
+   "name": "Chol/HDL Ratio",
+   "unit": "",
+   "data": [
+    5.46,
+    4.6,
+    3.9,
+    5,
+    6.2,
+    5.4,
+    5.5,
+    5.1,
+    4.6
+   ],
+   "ref": {
+    "min": null,
+    "max": 5
+   },
+   "meta": "Target: <5.0 | Best CVD predictor",
+   "explain": "Better predictor of cardiovascular risk than any single lipid. Reflects the balance of harmful vs. protective cholesterol.",
+   "status": "Almost always >5 due to low HDL. Raising HDL to 45 would bring ratio to ~4.0. This single improvement would transform your risk profile."
+  },
+  {
+   "id": "vitd",
+   "section": "vitamins",
+   "name": "Vitamin D",
+   "unit": "ng/mL",
+   "data": [
+    null,
+    null,
+    13.98,
+    null,
+    24.5,
+    null,
+    49.6,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 30,
+    "max": 100
+   },
+   "meta": "Target: 30-100 | Recovered ✅",
+   "explain": "Vitamin D supports bone health, immune function, and mood. Deficiency is epidemic in India despite sunny climate (indoor work, pollution, skin pigmentation).",
+   "status": "Excellent recovery: 14 to 25 to 50. Supplementation worked. Continue 1000 IU/day maintenance. No further action needed.",
+   "scoring": {
+    "optMin": 30,
+    "optMax": 80,
+    "hardMin": 10,
+    "hardMax": 150,
+    "invertTrend": true,
+    "weight": 0.025,
+    "refMin": 30,
+    "refMax": 100
+   }
+  },
+  {
+   "id": "vitb12",
+   "section": "vitamins",
+   "name": "Vitamin B12",
+   "unit": "pg/mL",
+   "data": [
+    null,
+    null,
+    190,
+    null,
+    166,
+    null,
+    283,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 211,
+    "max": null
+   },
+   "meta": "Target: >211 | Recovered ✅",
+   "explain": "B12 is essential for nerve function and blood cell production. Deficiency causes fatigue, tingling, cognitive issues. Common in Indian vegetarian diets.",
+   "status": "Recovered from 166 to 283. Continue oral B12 supplements, levels will drop again if stopped.",
+   "scoring": {
+    "optMin": 211,
+    "optMax": 700,
+    "hardMin": 100,
+    "hardMax": 1500,
+    "invertTrend": true,
+    "weight": 0.025,
+    "refMin": 211,
+    "refMax": null
+   }
+  },
+  {
+   "id": "sodium",
+   "section": "electrolytes",
+   "name": "Sodium",
+   "unit": "mmol/L",
+   "data": [
+    139,
+    139,
+    141,
+    143,
+    null,
+    null,
+    134,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 137,
+    "max": 145
+   },
+   "meta": "Target: 137-145 | Dipped Apr 2026",
+   "explain": "Sodium maintains fluid balance and nerve function. Low sodium (hyponatremia) causes headaches, fatigue, confusion. Hypothyroidism is a known cause.",
+   "status": "Was stable 139-143 for 3 years, dropped to 134 in Apr 2026. Likely related to hypothyroidism or over-hydration before test. One-time dip, monitor next test.",
+   "scoring": {
+    "optMin": 137,
+    "optMax": 145,
+    "hardMin": 125,
+    "hardMax": 155,
+    "invertTrend": false,
+    "weight": 0.03,
+    "refMin": 137,
+    "refMax": 145
+   }
+  },
+  {
+   "id": "potassium",
+   "section": "electrolytes",
+   "name": "Potassium",
+   "unit": "mmol/L",
+   "data": [
+    null,
+    4.43,
+    4.2,
+    4.7,
+    null,
+    null,
+    4.4,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 3.5,
+    "max": 5.1
+   },
+   "meta": "Target: 3.5-5.1",
+   "explain": "Critical for heart rhythm and muscle function.",
+   "status": "Always normal. No action needed."
+  },
+  {
+   "id": "hba1c",
+   "section": "sugar",
+   "name": "HbA1c",
+   "unit": "%",
+   "data": [
+    null,
+    4.9,
+    4.8,
+    null,
+    5.1,
+    null,
+    4.7,
+    null,
+    null
+   ],
+   "ref": {
+    "min": null,
+    "max": 5.7
+   },
+   "meta": "Target: <5.7% | Always normal",
+   "explain": "Reflects average blood sugar over 2-3 months. Gold standard for diabetes screening.",
+   "status": "Consistently 4.7-5.1%, zero diabetes risk. One of your strongest markers.",
+   "scoring": {
+    "optMin": 4.0,
+    "optMax": 5.6,
+    "hardMin": 3,
+    "hardMax": 8,
+    "invertTrend": false,
+    "weight": 0.1,
+    "refMin": null,
+    "refMax": 5.7
+   }
+  },
+  {
+   "id": "glucose",
+   "section": "sugar",
+   "name": "Fasting Glucose",
+   "unit": "mg/dL",
+   "data": [
+    83.5,
+    77,
+    88.4,
+    87,
+    80,
+    null,
+    82,
+    null,
+    79
+   ],
+   "ref": {
+    "min": 70,
+    "max": 100
+   },
+   "meta": "Target: 70-100",
+   "explain": "Snapshot of current blood sugar after overnight fast.",
+   "status": "Always 80-88 mg/dL. Textbook normal. Glucose metabolism is healthy.",
+   "scoring": {
+    "optMin": 70,
+    "optMax": 100,
+    "hardMin": 50,
+    "hardMax": 180,
+    "invertTrend": false,
+    "weight": 0.05,
+    "refMin": 70,
+    "refMax": 100
+   }
+  },
+  {
+   "id": "hb",
+   "section": "cbc",
+   "name": "Hemoglobin",
+   "unit": "g/dL",
+   "data": [
+    15.2,
+    15.7,
+    15.8,
+    14.5,
+    15,
+    14.9,
+    14.8,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 13,
+    "max": 17
+   },
+   "meta": "Target: 13-17",
+   "explain": "Oxygen-carrying protein in blood. Low = anemia.",
+   "status": "Rock stable. No anemia, excellent oxygen-carrying capacity.",
+   "scoring": {
+    "optMin": 13.5,
+    "optMax": 16,
+    "hardMin": 10,
+    "hardMax": 20,
+    "invertTrend": true,
+    "weight": 0.05,
+    "refMin": 13,
+    "refMax": 17
+   }
+  },
+  {
+   "id": "platelets",
+   "section": "cbc",
+   "name": "Platelets",
+   "unit": "×10³/µL",
+   "data": [
+    196,
+    226,
+    231,
+    204,
+    182,
+    218,
+    205,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 150,
+    "max": 450
+   },
+   "meta": "Target: 150-450",
+   "explain": "Blood clotting cells.",
+   "status": "Always mid-range normal. Healthy clotting function."
+  },
+  {
+   "id": "wbc",
+   "section": "cbc",
+   "name": "WBC",
+   "unit": "×10³/µL",
+   "data": [
+    6,
+    5.46,
+    null,
+    6,
+    5.75,
+    6.38,
+    5.59,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 4,
+    "max": 10
+   },
+   "meta": "Target: 4-10",
+   "explain": "Immune cells fighting infection.",
+   "status": "Stable 5.5-6.4. No infections, no immune issues.",
+   "scoring": {
+    "optMin": 4,
+    "optMax": 10,
+    "hardMin": 2,
+    "hardMax": 15,
+    "invertTrend": false,
+    "weight": 0.05,
+    "refMin": 4,
+    "refMax": 10
+   }
+  },
+  {
+   "id": "esr",
+   "section": "cbc",
+   "name": "ESR",
+   "unit": "mm/hr",
+   "data": [
+    5,
+    null,
+    7,
+    13,
+    4,
+    null,
+    7,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 0,
+    "max": 10
+   },
+   "meta": "Target: 0-10",
+   "explain": "Non-specific inflammation marker.",
+   "status": "One mild spike (13 in Jun 2024), otherwise normal. No chronic inflammation.",
+   "scoring": {
+    "optMin": 0,
+    "optMax": 10,
+    "hardMin": null,
+    "hardMax": 30,
+    "invertTrend": false,
+    "weight": 0.02,
+    "refMin": 0,
+    "refMax": 10
+   }
+  },
+  {
+   "id": "ast",
+   "section": "liver",
+   "name": "AST/SGOT",
+   "unit": "U/L",
+   "data": [
+    27.7,
+    25,
+    21.7,
+    25,
+    26,
+    null,
+    31,
+    null,
+    null
+   ],
+   "ref": {
+    "min": null,
+    "max": 50
+   },
+   "meta": "Target: <50",
+   "explain": "Liver enzyme. Elevated = liver stress/damage.",
+   "status": "Always well within range. Healthy liver.",
+   "scoring": {
+    "optMin": 10,
+    "optMax": 40,
+    "hardMin": null,
+    "hardMax": 100,
+    "invertTrend": false,
+    "weight": 0.05,
+    "refMin": null,
+    "refMax": 50
+   }
+  },
+  {
+   "id": "alt",
+   "section": "liver",
+   "name": "ALT/SGPT",
+   "unit": "U/L",
+   "data": [
+    15.9,
+    15,
+    16.7,
+    20,
+    19,
+    null,
+    28,
+    null,
+    null
+   ],
+   "ref": {
+    "min": null,
+    "max": 50
+   },
+   "meta": "Target: <50",
+   "explain": "Liver-specific enzyme. More sensitive than AST for liver issues.",
+   "status": "Normal. No fatty liver indicators.",
+   "scoring": {
+    "optMin": 10,
+    "optMax": 40,
+    "hardMin": null,
+    "hardMax": 100,
+    "invertTrend": false,
+    "weight": 0.05,
+    "refMin": null,
+    "refMax": 50
+   }
+  },
+  {
+   "id": "bilirubin",
+   "section": "liver",
+   "name": "Bilirubin Total",
+   "unit": "mg/dL",
+   "data": [
+    0.45,
+    0.9,
+    0.82,
+    1,
+    0.95,
+    null,
+    1.09,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 0.2,
+    "max": 1.3
+   },
+   "meta": "Target: 0.2-1.3",
+   "explain": "Byproduct of red blood cell breakdown. High = liver/gallbladder issues.",
+   "status": "Slowly trending up (0.45 to 1.09) but within range. Could be mild Gilbert's syndrome (benign), worth watching."
+  },
+  {
+   "id": "albumin",
+   "section": "liver",
+   "name": "Albumin",
+   "unit": "g/dL",
+   "data": [
+    4.31,
+    4.63,
+    4.41,
+    4.2,
+    4.7,
+    null,
+    4.4,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 3.5,
+    "max": 5
+   },
+   "meta": "Target: 3.5-5.0",
+   "explain": "Main liver-produced protein. Reflects nutrition and liver function.",
+   "status": "Excellent, consistently 4.2-4.7. Good nutrition and liver synthesis."
+  },
+  {
+   "id": "creatinine",
+   "section": "kidney",
+   "name": "Creatinine",
+   "unit": "mg/dL",
+   "data": [
+    0.87,
+    0.94,
+    0.87,
+    0.9,
+    0.8,
+    null,
+    0.95,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 0.66,
+    "max": 1.25
+   },
+   "meta": "Target: 0.66-1.25",
+   "explain": "Muscle waste product filtered by kidneys. Stable creatinine = stable kidney function.",
+   "status": "Perfect kidney function across 4 years. No decline.",
+   "scoring": {
+    "optMin": 0.6,
+    "optMax": 1.2,
+    "hardMin": 0.3,
+    "hardMax": 2.5,
+    "invertTrend": false,
+    "weight": 0.05,
+    "refMin": 0.66,
+    "refMax": 1.25
+   }
+  },
+  {
+   "id": "uricacid",
+   "section": "kidney",
+   "name": "Uric Acid",
+   "unit": "mg/dL",
+   "data": [
+    7.2,
+    6.7,
+    6.86,
+    7.2,
+    6.9,
+    null,
+    8,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 3.5,
+    "max": 8.5
+   },
+   "meta": "Target: 3.5-8.5 | Trending up",
+   "explain": "From purine metabolism. High = gout risk, kidney stones. Affected by diet, hydration, and hypothyroidism.",
+   "status": "Trending up: 6.9 to 8.0. Approaching upper limit. Addressable with hydration (3L/day) and reduced purine intake. Hypothyroidism contributes.",
+   "scoring": {
+    "optMin": 3.5,
+    "optMax": 7.5,
+    "hardMin": 2,
+    "hardMax": 12,
+    "invertTrend": false,
+    "weight": 0.05,
+    "refMin": 3.5,
+    "refMax": 8.5
+   }
+  },
+  {
+   "id": "egfr",
+   "section": "kidney",
+   "name": "eGFR",
+   "unit": "mL/min/1.73m²",
+   "data": [
+    null,
+    null,
+    113,
+    null,
+    118,
+    null,
+    105,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 90,
+    "max": null
+   },
+   "meta": "Target: ≥90",
+   "explain": "Kidney filtration rate. >90 = normal. Naturally declines ~1/year after 40.",
+   "status": "All above 90. Normal kidney filtration."
+  },
+  {
+   "id": "urea",
+   "section": "kidney",
+   "name": "Urea",
+   "unit": "mg/dL",
+   "data": [
+    21,
+    22.47,
+    22.68,
+    28,
+    28,
+    null,
+    37,
+    null,
+    null
+   ],
+   "ref": {
+    "min": 17,
+    "max": 43
+   },
+   "meta": "Target: 17-43",
+   "explain": "Protein breakdown product. High = kidney issues or high protein diet.",
+   "status": "Trending up (21 to 37) but within range. Likely reflects higher protein intake. Kidneys confirmed healthy by creatinine/eGFR."
+  }
+ ],
+ "breakdown": [
+  {
+   "name": "Thyroid",
+   "markers": [
+    "tsh",
+    "tt3",
+    "tt4"
+   ],
+   "fallback": 50
+  },
+  {
+   "name": "HDL",
+   "markers": [
+    "hdl"
+   ],
+   "fallback": 50
+  },
+  {
+   "name": "LDL / TG",
+   "markers": [
+    "ldl",
+    "tg"
+   ],
+   "fallback": 70
+  },
+  {
+   "name": "Blood Sugar",
+   "markers": [
+    "hba1c"
+   ],
+   "fallback": 100
+  },
+  {
+   "name": "Liver",
+   "markers": [
+    "ast",
+    "alt"
+   ],
+   "fallback": 90
+  },
+  {
+   "name": "Kidney",
+   "markers": [
+    "creatinine",
+    "uricacid"
+   ],
+   "fallback": 85
+  }
+ ],
+ "notes": {
+  "antiTPO": "NEGATIVE (<3.00 IU/mL), not Hashimoto's. Natural thyroid management is viable.",
+  "lastReport": "6 Sep 2026 (Report #9)"
+ }
+}

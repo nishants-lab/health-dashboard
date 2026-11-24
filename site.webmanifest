@@ -1,0 +1,15 @@
+{
+  "name": "Health Dashboard",
+  "short_name": "Health",
+  "description": "Personal lab-report tracker with trend-adjusted health scoring.",
+  "icons": [
+    { "src": "favicon-16.png", "sizes": "16x16", "type": "image/png" },
+    { "src": "favicon-32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "favicon.svg", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "theme_color": "#0b0f14",
+  "background_color": "#0b0f14",
+  "display": "standalone",
+  "start_url": "./index.html"
+}
