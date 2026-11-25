@@ -268,6 +268,16 @@ export function renderPlan(m) {
     }
     st.className = "plan-status plan-status-" + (met ? "ok" : "miss");
     st.textContent = base + trend;
+
+    const card = h4.closest(".plan-card");
+    if (card) card.classList.toggle("plan-card-met", met);
+  }
+
+  for (const span of document.querySelectorAll("#tab-plan [data-plan-range]")) {
+    const mk = byId[span.dataset.planRange];
+    if (!mk) continue;
+    const vals = mk.series.filter(v => v !== null && v !== undefined);
+    if (vals.length) span.textContent = `${fmt(Math.min(...vals))} to ${fmt(Math.max(...vals))}`;
   }
 }
 

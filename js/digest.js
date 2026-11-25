@@ -42,6 +42,6 @@ export function computeDigest(markers) {
 export const digestCopy = {
   entered: { text: "back in range", good: true },
   improved: { text: "improving", good: true },
-  left: { text: "left range", good: false },
+  left: { text: "out of range", good: false },
   worsened: { text: "worsening", good: false },
 };

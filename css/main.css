@@ -259,6 +259,8 @@ button { font: inherit; color: inherit; }
 .plan-status { display: inline-block; font-size: var(--fs-xs); font-weight: 600; padding: 2px 9px; border-radius: 999px; margin: -4px 0 10px; }
 .plan-status-ok { background: var(--ok-soft); color: var(--ok); }
 .plan-status-miss { background: var(--bad-soft); color: var(--bad); }
+.plan-card-met { opacity: 0.66; }
+.plan-card-met:hover { opacity: 1; }
 .plan-card li { margin-bottom: 4px; }
 .plan-card li b, .plan-card li strong { color: var(--text); }
 .plan-card .why { font-size: var(--fs-xs); color: var(--text-3); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); line-height: 1.6; }
