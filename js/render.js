@@ -193,6 +193,7 @@ export function renderSections(m) {
               <p>${mk.explain}</p>
               <div class="your-status"><b>Your situation:</b> ${situationLine(mk)}</div>
               ${mk.note ? `<div class="your-note">${mk.note}</div>` : ""}
+              ${mk.id === "tsh" && m.notes && m.notes.antiTPO ? `<div class="your-note"><b>Anti-TPO (Hashimoto's):</b> ${m.notes.antiTPO}</div>` : ""}
             </div>
           </div>
         </div>`;
@@ -227,7 +228,47 @@ export function renderMeta(m) {
     ` · ${m.profile.sex}, ${m.profile.age} yrs` + (upl ? ` · ${upl} uploaded` : "");
   $("#note-foot").innerHTML =
     `<b>How to read:</b> shaded band = reference range, red points = out of range. Tap "What is ...?" on any card for context.
-     <br><b>Last lab report:</b> ${m.notes.lastReport}. Anti-TPO: <b>${m.notes.antiTPO}</b>`;
+     <br><b>Last lab report:</b> ${m.notes.lastReport}.`;
+}
+
+const PLAN_TARGETS = {
+  tsh:      { label: "TSH",           cond: "hypothyroid", dir: "below", target: 4.94 },
+  hdl:      { label: "HDL",                                dir: "above", target: 45 },
+  ldl:      { label: "LDL",                                dir: "below", target: 100 },
+  tg:       { label: "Triglycerides",                      dir: "below", target: 150 },
+  uricacid: { label: "Uric Acid",                          dir: "below", target: 7.0 },
+};
+
+export function renderPlan(m) {
+  const byId = {};
+  for (const mk of m.markers) byId[mk.id] = mk;
+  for (const h4 of document.querySelectorAll("#tab-plan h4[data-pm]")) {
+    const cfg = PLAN_TARGETS[h4.dataset.pm];
+    const mk = byId[h4.dataset.pm];
+    if (!cfg || !mk) continue;
+    const cur = latest(mk.series);
+    const prev = previous(mk.series, cur.index);
+    const v = cur.value;
+    if (v === null || v === undefined) continue;
+    const op = cfg.dir === "below" ? "<" : ">";
+    const cond = cfg.cond ? ` (${cfg.cond})` : "";
+    h4.textContent = `${cfg.label}${cond} - ${fmt(v)} to target ${op}${cfg.target}`;
+
+    const met = cfg.dir === "below" ? v <= cfg.target : v >= cfg.target;
+    let trend = "";
+    if (prev && prev.value !== null && prev.value !== undefined && v !== prev.value) {
+      const better = cfg.dir === "below" ? v < prev.value : v > prev.value;
+      trend = better ? ", improving" : ", worsening";
+    }
+    const base = met ? "On target now" : (cfg.dir === "below" ? "Above target" : "Below target");
+    let st = h4.nextElementSibling;
+    if (!st || !st.classList.contains("plan-status")) {
+      st = document.createElement("div");
+      h4.after(st);
+    }
+    st.className = "plan-status plan-status-" + (met ? "ok" : "miss");
+    st.textContent = base + trend;
+  }
 }
 
 export function renderDashboard() {
@@ -236,4 +277,5 @@ export function renderDashboard() {
   renderDigest(m);
   renderSections(m);
   renderMeta(m);
+  renderPlan(m);
 }
