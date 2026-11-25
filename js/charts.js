@@ -34,6 +34,7 @@ export function markerChart(canvas, labels, series, ref, opts = {}) {
     ann.band = { type: "box", yMin: 0, yMax: refMax, backgroundColor: c.okBand, borderWidth: 0 };
     ann.lMax = { type: "line", yMin: refMax, yMax: refMax, borderColor: c.grid, borderWidth: 1, borderDash: [4, 4] };
   } else if (refMin !== null) {
+    ann.band = { type: "box", yMin: refMin, backgroundColor: c.okBand, borderWidth: 0 };
     ann.lMin = { type: "line", yMin: refMin, yMax: refMin, borderColor: c.grid, borderWidth: 1, borderDash: [4, 4] };
   }
   const pointColors = series.map(v => {

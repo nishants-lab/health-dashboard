@@ -7,7 +7,7 @@
 // [Test name] [Result] [Unit] [Reference interval].
 
 const MARKERS = [
-  { id: "tsh",        names: ["Thyroid Stimulating Hormone", "TSH"] },
+  { id: "tsh",        names: ["Thyroid Stimulating Hormone", "Thyroid Stimulating", "TSH"], exclude: ["Profile", "Panel"] },
   { id: "ft3",        names: ["Free T3", "FT3", "Free Triiodothyronine"] },
   { id: "ft4",        names: ["Free T4", "FT4", "Free Thyroxine"] },
   { id: "tt3",        names: ["T3.{0,3}Total", "Total T3", "Triiodothyronine"], exclude: ["Free", "FT3", "Uptake", "Interpretation"] },
@@ -17,7 +17,7 @@ const MARKERS = [
   { id: "ldl",        names: ["LDL Cholesterol", "Cholesterol.{0,4}\\bLDL\\b", "Low.?Density Lipoprotein"], exclude: ["Ratio", "VLDL"] },
   { id: "tg",         names: ["Triglycerides"] },
   { id: "vldl",       names: ["VLDL", "Very Low.?Density"] },
-  { id: "cholratio",  names: ["Cholesterol.{0,30}HDL.{0,20}?(\\d+(?:\\.\\d+)?)\\s*Ratio", "CHOL\\s*/\\s*HDL", "CHO/HDL RATIO", "TC/ ?HDL"], exclude: ["LDL\\s*/\\s*HDL", "HDL\\s*/\\s*LDL"] },
+  { id: "cholratio",  names: ["(?:CHOL|TC)\\s*/\\s*HDL\\s*Ratio\\s*(\\d+(?:\\.\\d+)?)", "Cholesterol.{0,30}HDL.{0,20}?(\\d+(?:\\.\\d+)?)\\s*Ratio", "CHOL\\s*/\\s*HDL", "CHO/HDL RATIO", "TC/ ?HDL"], exclude: ["LDL\\s*/\\s*HDL", "HDL\\s*/\\s*LDL"] },
   { id: "vitd",       names: ["Vitamin D.{0,10}25", "25.?OH Vitamin D", "25.?Hydroxy"] },
   { id: "vitb12",     names: ["Vitamin B.?12", "Cyanocobalamin"] },
   { id: "hba1c",      names: ["HbA1c", "Glycated H(a?)emoglobin"], exclude: ["Mean", "Average"] },
@@ -168,6 +168,15 @@ function findMarker(rows, marker) {
       if (cands.length) {
         return { value: cands[0].norm, confidence: cands.length === 1 ? "high" : "medium", row: row.text };
       }
+      // Some labs wrap a two-line analyte name and align the result columns
+      // with the FIRST line, leaving the identifying token on the line BELOW
+      // its own value (e.g. "Total 1.15 ng/mL" then "Triiodothyronine (T3)").
+      // When the matched row is a short bare-name line with no result of its
+      // own and the row directly above begins "Total <value>", read it there.
+      if (r > 0 && row.text.length <= 32 && /^\s*total\b/i.test(rows[r - 1].text)) {
+        const pc = resultCandidates(rows[r - 1].text, 0, marker.id, 40);
+        if (pc.length) return { value: pc[0].norm, confidence: "low", row: rows[r - 1].text };
+      }
       // result may sit on the next 1-2 visual lines (name wrapped across rows).
       // For the row two lines down, the value must sit at the very start of the
       // row (idx<=3) and the intervening row must be a pure name continuation
@@ -187,9 +196,9 @@ function detectDate(rows) {
   const text = rows.map(r => r.text).join("\n");
   const months = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
   const pats = [
-    /(?:Collection|Collected|Sample Collected|Received)[^\n]{0,60}?(\d{1,2})[\/\- ](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\/\- ,](\d{2,4})/i,
+    /(?:Collection|Collected|Sample Collected|Received)[^\n]{0,60}?(\d{1,2})[\/\-\s]+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\/\-,\s]+(\d{2,4})/i,
     /(?:Collection|Collected|Sample Collected|Received)[^\n]{0,60}?(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/i,
-    /(\d{1,2})[\/\- ](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\/\- ,](\d{2,4})/i,
+    /(\d{1,2})[\/\-\s]+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\/\-,\s]+(\d{2,4})/i,
     /(\d{2})\/(\d{2})\/(\d{4})/,
   ];
   for (const pat of pats) {
@@ -216,6 +225,7 @@ function detectLab(rows) {
   if (t.includes("sparsh hospital")) return "Sparsh Hospital";
   if (t.includes("metropolis")) return "Metropolis";
   if (t.includes("dr lal") || t.includes("dr. lal")) return "Dr Lal PathLabs";
+  if (t.includes("connect & heal") || t.includes("predlabs")) return "Connect & Heal";
   return "Unknown lab";
 }
 

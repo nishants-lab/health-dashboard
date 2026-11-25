@@ -120,7 +120,7 @@
    },
    "meta": "Target: 0.35-4.94 | Elevated in ALL tests",
    "explain": "TSH signals the thyroid to produce hormones. High TSH = underactive thyroid (hypothyroidism). The pituitary gland is working overtime to compensate.",
-   "status": "Consistently 2-3× upper limit since 2022. Subclinical hypothyroidism confirmed (T3/T4 normal). Cascading effects: raises LDL, lowers HDL, causes fatigue, weight gain. Medication dose likely needs adjustment.",
+   "note": "Subclinical hypothyroidism (T3 and T4 still normal). Elevated TSH tends to raise LDL, lower HDL, and cause fatigue and weight gain; a medication dose review may help.",
    "scoring": {
     "optMin": 0.5,
     "optMax": 4.5,
@@ -155,7 +155,7 @@
    },
    "meta": "Target: 1.58-3.91 | Always normal",
    "explain": "Free T3 is the active thyroid hormone driving metabolism. Normal Free T3 with high TSH = subclinical hypothyroidism.",
-   "status": "Normal, your body still converts enough T4 to T3. But this may not hold if TSH keeps rising."
+   "note": "Reflects that enough T4 is still converting to T3; this may not hold if TSH keeps rising."
   },
   {
    "id": "ft4",
@@ -180,7 +180,7 @@
    },
    "meta": "Target: 0.7-1.48 | Always normal",
    "explain": "Free T4 is the storage hormone. The body converts it to active T3 as needed.",
-   "status": "Normal but mid-low range. If this drops below 0.7 with rising TSH, you'd move from subclinical to overt hypothyroidism."
+   "note": "If this drops below range while TSH rises, it would mark a shift from subclinical to overt hypothyroidism."
   },
   {
    "id": "tt3",
@@ -205,7 +205,7 @@
    },
    "meta": "Target: 0.35-1.93 | Always normal",
    "explain": "Total T3 measures all triiodothyronine in the blood (both bound and free). Normal Total T3 alongside a high TSH points to subclinical rather than overt hypothyroidism.",
-   "status": "Normal in every test where it was measured. The thyroid still produces enough active hormone despite the raised TSH."
+   "note": "The thyroid still makes enough active hormone despite the raised TSH."
   },
   {
    "id": "tt4",
@@ -230,7 +230,7 @@
    },
    "meta": "Target: 4.87-11.72 | Always normal",
    "explain": "Total T4 measures all thyroxine in the blood. The body converts T4 to active T3 as needed. Normal T4 with a high TSH means the thyroid is keeping output up under pituitary pressure.",
-   "status": "Normal in every test where it was measured."
+   "note": ""
   },
   {
    "id": "hdl",
@@ -255,7 +255,7 @@
    },
    "meta": "Target: >40 (ideally >50) | Below range in ALL tests",
    "explain": "HDL removes excess cholesterol from arteries. Low HDL is an independent cardiovascular risk factor, especially prevalent in Indians (~66% have low HDL per LAI-2020).",
-   "status": "Never been in range across 4 years (28-40). Slightly improving trend (28 to 35). Driven by hypothyroidism + likely sedentary lifestyle. Exercise is the #1 lever.",
+   "note": "Low HDL is driven by hypothyroidism and a likely sedentary routine; regular exercise is the main lever.",
    "scoring": {
     "optMin": 45,
     "optMax": 80,
@@ -290,7 +290,7 @@
    },
    "meta": "Target: <100 | Borderline-high",
    "explain": "LDL deposits cholesterol in artery walls. Primary target for cardiovascular risk reduction per NCEP/LAI guidelines.",
-   "status": "Fluctuates 100-129. Borderline. Hypothyroidism directly raises LDL, fixing TSH could bring this below 100 without medication.",
+   "note": "Hypothyroidism directly raises LDL, so improving TSH could lower it without medication.",
    "scoring": {
     "optMin": 50,
     "optMax": 100,
@@ -325,7 +325,7 @@
    },
    "meta": "Target: <150 | Highly diet-responsive",
    "explain": "Triglycerides are dietary fats. High TG = cardiovascular risk, especially in Indians with atherogenic dyslipidemia (high TG + low HDL + high LDL).",
-   "status": "Swings 108-207. Very sensitive to what you ate the night before testing. When controlled (Jun 2024: 108), your VLDL and ratios normalize too.",
+   "note": "Very sensitive to the previous evening's meal; keeping it controlled also normalizes VLDL and the cholesterol ratios.",
    "scoring": {
     "optMin": 50,
     "optMax": 150,
@@ -360,7 +360,7 @@
    },
    "meta": "Target: <200 | Always within range",
    "explain": "Sum of all cholesterol fractions. A blunt instrument, can mask bad composition (low HDL + high LDL).",
-   "status": "Always normal, but your composition is unfavorable. Total cholesterol alone is misleading in your case."
+   "note": "Total cholesterol alone is misleading here; HDL and the Chol/HDL ratio matter more."
   },
   {
    "id": "vldl",
@@ -385,7 +385,7 @@
    },
    "meta": "Target: <30 | Tracks with triglycerides",
    "explain": "VLDL carries triglycerides. Calculated as TG/5. High VLDL = high TG being circulated.",
-   "status": "Directly follows your TG, when TG is controlled, VLDL normalizes. Fix TG and VLDL fixes itself."
+   "note": "Tracks triglycerides directly; controlling TG brings VLDL down with it."
   },
   {
    "id": "cholratio",
@@ -410,7 +410,7 @@
    },
    "meta": "Target: <5.0 | Best CVD predictor",
    "explain": "Better predictor of cardiovascular risk than any single lipid. Reflects the balance of harmful vs. protective cholesterol.",
-   "status": "Almost always >5 due to low HDL. Raising HDL to 45 would bring ratio to ~4.0. This single improvement would transform your risk profile."
+   "note": "Driven by low HDL; raising HDL toward 45 would pull the ratio near 4.0 and materially lower cardiovascular risk."
   },
   {
    "id": "vitd",
@@ -433,9 +433,9 @@
     "min": 30,
     "max": 100
    },
-   "meta": "Target: 30-100 | Recovered ✅",
+   "meta": "Target: 30-100 | Recovered",
    "explain": "Vitamin D supports bone health, immune function, and mood. Deficiency is epidemic in India despite sunny climate (indoor work, pollution, skin pigmentation).",
-   "status": "Excellent recovery: 14 to 25 to 50. Supplementation worked. Continue 1000 IU/day maintenance. No further action needed.",
+   "note": "Supplementation worked; a maintenance dose (about 1000 IU/day) keeps it up.",
    "scoring": {
     "optMin": 30,
     "optMax": 80,
@@ -468,9 +468,9 @@
     "min": 211,
     "max": null
    },
-   "meta": "Target: >211 | Recovered ✅",
+   "meta": "Target: >211 | Recovered",
    "explain": "B12 is essential for nerve function and blood cell production. Deficiency causes fatigue, tingling, cognitive issues. Common in Indian vegetarian diets.",
-   "status": "Recovered from 166 to 283. Continue oral B12 supplements, levels will drop again if stopped.",
+   "note": "Oral B12 maintains the level; it falls again if stopped.",
    "scoring": {
     "optMin": 211,
     "optMax": 700,
@@ -505,7 +505,7 @@
    },
    "meta": "Target: 137-145 | Dipped Apr 2026",
    "explain": "Sodium maintains fluid balance and nerve function. Low sodium (hyponatremia) causes headaches, fatigue, confusion. Hypothyroidism is a known cause.",
-   "status": "Was stable 139-143 for 3 years, dropped to 134 in Apr 2026. Likely related to hypothyroidism or over-hydration before test. One-time dip, monitor next test.",
+   "note": "A low reading can reflect hypothyroidism or over-hydration before the test; worth monitoring.",
    "scoring": {
     "optMin": 137,
     "optMax": 145,
@@ -540,7 +540,7 @@
    },
    "meta": "Target: 3.5-5.1",
    "explain": "Critical for heart rhythm and muscle function.",
-   "status": "Always normal. No action needed."
+   "note": ""
   },
   {
    "id": "hba1c",
@@ -565,7 +565,7 @@
    },
    "meta": "Target: <5.7% | Always normal",
    "explain": "Reflects average blood sugar over 2-3 months. Gold standard for diabetes screening.",
-   "status": "Consistently 4.7-5.1%, zero diabetes risk. One of your strongest markers.",
+   "note": "",
    "scoring": {
     "optMin": 4,
     "optMax": 5.6,
@@ -600,7 +600,7 @@
    },
    "meta": "Target: 70-100",
    "explain": "Snapshot of current blood sugar after overnight fast.",
-   "status": "Always 80-88 mg/dL. Textbook normal. Glucose metabolism is healthy.",
+   "note": "",
    "scoring": {
     "optMin": 70,
     "optMax": 100,
@@ -635,7 +635,7 @@
    },
    "meta": "Target: 13-17",
    "explain": "Oxygen-carrying protein in blood. Low = anemia.",
-   "status": "Rock stable. No anemia, excellent oxygen-carrying capacity.",
+   "note": "",
    "scoring": {
     "optMin": 13.5,
     "optMax": 16,
@@ -670,7 +670,7 @@
    },
    "meta": "Target: 150-450",
    "explain": "Blood clotting cells.",
-   "status": "Always mid-range normal. Healthy clotting function."
+   "note": ""
   },
   {
    "id": "wbc",
@@ -695,7 +695,7 @@
    },
    "meta": "Target: 4-10",
    "explain": "Immune cells fighting infection.",
-   "status": "Stable 5.5-6.4. No infections, no immune issues.",
+   "note": "",
    "scoring": {
     "optMin": 4,
     "optMax": 10,
@@ -730,7 +730,7 @@
    },
    "meta": "Target: 0-10",
    "explain": "Non-specific inflammation marker.",
-   "status": "One mild spike (13 in Jun 2024), otherwise normal. No chronic inflammation.",
+   "note": "Occasional mild spikes can happen without chronic inflammation.",
    "scoring": {
     "optMin": 0,
     "optMax": 10,
@@ -765,7 +765,7 @@
    },
    "meta": "Target: <50",
    "explain": "Liver enzyme. Elevated = liver stress/damage.",
-   "status": "Always well within range. Healthy liver.",
+   "note": "",
    "scoring": {
     "optMin": 10,
     "optMax": 40,
@@ -800,7 +800,7 @@
    },
    "meta": "Target: <50",
    "explain": "Liver-specific enzyme. More sensitive than AST for liver issues.",
-   "status": "Normal. No fatty liver indicators.",
+   "note": "",
    "scoring": {
     "optMin": 10,
     "optMax": 40,
@@ -835,7 +835,7 @@
    },
    "meta": "Target: 0.2-1.3",
    "explain": "Byproduct of red blood cell breakdown. High = liver/gallbladder issues.",
-   "status": "Slowly trending up (0.45 to 1.09) but within range. Could be mild Gilbert's syndrome (benign), worth watching."
+   "note": "A slow rise that stays within range can indicate benign Gilbert's syndrome; worth watching."
   },
   {
    "id": "albumin",
@@ -860,7 +860,7 @@
    },
    "meta": "Target: 3.5-5.0",
    "explain": "Main liver-produced protein. Reflects nutrition and liver function.",
-   "status": "Excellent, consistently 4.2-4.7. Good nutrition and liver synthesis."
+   "note": ""
   },
   {
    "id": "creatinine",
@@ -885,7 +885,7 @@
    },
    "meta": "Target: 0.66-1.25",
    "explain": "Muscle waste product filtered by kidneys. Stable creatinine = stable kidney function.",
-   "status": "Perfect kidney function across 4 years. No decline.",
+   "note": "",
    "scoring": {
     "optMin": 0.6,
     "optMax": 1.2,
@@ -920,7 +920,7 @@
    },
    "meta": "Target: 3.5-8.5 | Trending up",
    "explain": "From purine metabolism. High = gout risk, kidney stones. Affected by diet, hydration, and hypothyroidism.",
-   "status": "Trending up: 6.9 to 8.0. Approaching upper limit. Addressable with hydration (3L/day) and reduced purine intake. Hypothyroidism contributes.",
+   "note": "Addressable with hydration (about 3 L/day) and lower purine intake; hypothyroidism also contributes.",
    "scoring": {
     "optMin": 3.5,
     "optMax": 7.5,
@@ -955,7 +955,7 @@
    },
    "meta": "Target: ≥90",
    "explain": "Kidney filtration rate. >90 = normal. Naturally declines ~1/year after 40.",
-   "status": "All above 90. Normal kidney filtration."
+   "note": ""
   },
   {
    "id": "urea",
@@ -980,7 +980,7 @@
    },
    "meta": "Target: 17-43",
    "explain": "Protein breakdown product. High = kidney issues or high protein diet.",
-   "status": "Trending up (21 to 37) but within range. Likely reflects higher protein intake. Kidneys confirmed healthy by creatinine/eGFR."
+   "note": "A rise within range usually reflects higher protein intake; creatinine and eGFR confirm kidney function is fine."
   }
  ],
  "breakdown": [

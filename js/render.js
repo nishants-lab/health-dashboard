@@ -111,6 +111,52 @@ function refText(ref) {
   return "";
 }
 
+// A fresh, data-derived situation line (recomputed on every load, never stale):
+// latest value, whether it is in range, how many readings are in range, and the
+// trend from the first measured report to the latest.
+function situationLine(mk) {
+  const ref = mk.ref, u = mk.unit ? " " + mk.unit : "";
+  const pts = [];
+  mk.series.forEach((v, i) => { if (v !== null && v !== undefined) pts.push({ v, i }); });
+  if (!pts.length) return "No readings yet.";
+  const reps = model().reports;
+  const last = pts[pts.length - 1], first = pts[0];
+  const inCount = pts.filter(p => inRange(p.v, ref)).length;
+  const okNow = inRange(last.v, ref);
+  const pos = okNow ? "in range" : (ref.max != null && last.v > ref.max ? "above target" : "below target");
+  let out = `Latest ${fmt(last.v)}${u} (${reps[last.i].label}), ${pos}. ${inCount} of ${pts.length} readings in range.`;
+  if (pts.length >= 2) {
+    const d = last.v - first.v;
+    const rel = Math.abs(d) / (Math.abs(first.v) || 1);
+    out += rel < 0.05
+      ? ` Stable near ${fmt(last.v)} since ${reps[first.i].label}.`
+      : ` ${d > 0 ? "Up" : "Down"} from ${fmt(first.v)} (${reps[first.i].label}) to ${fmt(last.v)}.`;
+  }
+  return out;
+}
+
+// A section's badge + priority, computed from the latest value of each marker
+// so headers never carry stale claims. "near limit" = within 7% of a bound.
+function sectionState(secId) {
+  let out = 0, near = 0, measured = 0;
+  for (const m of model().markers) {
+    if (m.section !== secId) continue;
+    const l = latest(m.series);
+    if (l.value === null) continue;
+    measured++;
+    if (inRange(l.value, m.ref) === false) { out++; continue; }
+    const { min, max } = m.ref;
+    if ((min != null && l.value <= min * 1.07) || (max != null && l.value >= max * 0.93)) near++;
+  }
+  const priority = out > 0 ? "high" : near > 0 ? "medium" : "normal";
+  let badge;
+  if (!measured) badge = "No data";
+  else if (out > 0) badge = `${out} of ${measured} out of range`;
+  else if (near > 0) badge = `${near} near limit`;
+  else badge = `All ${measured} in range`;
+  return { priority, badge };
+}
+
 export function renderSections(m) {
   const container = $("#sections");
   container.innerHTML = "";
@@ -121,9 +167,10 @@ export function renderSections(m) {
   for (const sec of m.sections) {
     const section = el("section", "section");
     section.id = "sec-" + sec.id;
+    const st = sectionState(sec.id);
     section.innerHTML = `<div class="section-head">
       <h2>${sec.title}</h2>
-      <span class="badge badge-${sec.priority}"><span class="dot dot-${sec.priority}"></span>${sec.badge}</span>
+      <span class="badge badge-${st.priority}"><span class="dot dot-${st.priority}"></span>${st.badge}</span>
     </div>`;
     const grid = el("div", "cards-grid");
     for (const mk of bySection[sec.id] || []) {
@@ -144,7 +191,8 @@ export function renderSections(m) {
           <div class="mc-detail" id="detail-${mk.id}">
             <div>
               <p>${mk.explain}</p>
-              <div class="your-status"><b>Your situation:</b> ${mk.status}</div>
+              <div class="your-status"><b>Your situation:</b> ${situationLine(mk)}</div>
+              ${mk.note ? `<div class="your-note">${mk.note}</div>` : ""}
             </div>
           </div>
         </div>`;
@@ -168,7 +216,7 @@ export function renderSections(m) {
 
   // section chips
   $("#chips").innerHTML = m.sections.map(s =>
-    `<a class="chip" data-sec="sec-${s.id}" href="#sec-${s.id}"><span class="dot dot-${s.priority}"></span>${s.title}</a>`
+    `<a class="chip" data-sec="sec-${s.id}" href="#sec-${s.id}"><span class="dot dot-${sectionState(s.id).priority}"></span>${s.title}</a>`
   ).join("");
 }
 
